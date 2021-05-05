@@ -1,0 +1,7 @@
+# Project exclude paths
+/.gradle/
+/build/
+/build/classes/java/main/
+
+# keys file
+/keys.txt
