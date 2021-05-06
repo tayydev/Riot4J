@@ -16,14 +16,15 @@ public class CleanLimitedQueue {
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
 
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
-        Request request = new Request(r);
-        in.tryEmitNext(request);
-        return out()
+        Request request = new Request(r); //create a request
+        in.tryEmitNext(request); //emmit request
+        return out() //get the first item in our out flux that matches our request id
                 .filter(completed -> completed.id == request.id)
                 .next()
                 .map(completed -> completed.result);
     }
 
+    //take everything in our in sink and flatmap it into a completed request. If we get 429 we wait it out and try again
     private Flux<Completed> out() {
         return in.asFlux().flatMap(request -> conversion.apply(request)
                         .onErrorResume(error -> {
@@ -36,6 +37,7 @@ public class CleanLimitedQueue {
                         }), 1);
     }
 
+    //take a given request and make the web request. If the request 429s return a RateLimitException
     private final Function<Request, Mono<Completed>> conversion = request ->
         request.response.responseSingle(((response, byteBufMono) -> {
             if(response.status().code() / 100 == 2)
@@ -61,10 +63,6 @@ public class CleanLimitedQueue {
         public Completed(int id, String result) {
             this.id = id;
             this.result = result;
-        }
-
-        public String getResult() {
-            return result;
         }
     }
 }
