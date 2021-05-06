@@ -1,6 +1,7 @@
 package io.github.nathannorth.riotWrapper;
 
 import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
+import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIBuilder;
 import io.github.nathannorth.riotWrapper.objects.ValRegion;
 
 import java.io.IOException;
@@ -11,9 +12,16 @@ import java.util.List;
 public class TesterClass {
     public static void main(String[] args) {
 
-        RiotDevelopmentAPIClient client = new RiotDevelopmentAPIClient(getKeys().get(0));
+        //todo make response code have optional parameters
 
-        System.out.println(client.getValStatus(ValRegion.BRAZIL).block().toString());
+        RiotDevelopmentAPIClient client = RiotDevelopmentAPIBuilder.builder()
+                .addToken(getKeys().get(0))
+                .build()
+                .block();
+
+        client.getValStatus(ValRegion.ASIA_PACIFIC).doOnNext(status -> System.out.println(status)).block();
+
+        //System.out.println(client.getValStatus(ValRegion.BRAZIL).block().toString());
     }
 
     //keys.txt is stored in root dir and holds instance-specific data (eg. bot token)

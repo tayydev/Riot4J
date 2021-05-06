@@ -7,7 +7,7 @@ public class RiotAPIClient {
     final HttpClient webClient = HttpClient.create();;
 
     //todo make sure this is private
-    RiotAPIClient(String token) {
+    protected RiotAPIClient(String token) {
         this.token = token;
     }
 }

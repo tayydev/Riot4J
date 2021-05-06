@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@JsonSerialize(as = ImmutableFailureData.class)
-@JsonDeserialize(as = ImmutableFailureData.class)
-public interface FailureData {
+@JsonSerialize(as = ImmutableResponseCode.class)
+@JsonDeserialize(as = ImmutableResponseCode.class)
+public interface ResponseCode {
     Data status();
 
     @Value.Immutable
