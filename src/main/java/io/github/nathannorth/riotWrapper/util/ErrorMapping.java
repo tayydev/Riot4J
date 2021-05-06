@@ -2,26 +2,26 @@ package io.github.nathannorth.riotWrapper.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.nathannorth.riotWrapper.json.ResponseCode;
 import reactor.core.publisher.Mono;
+import reactor.netty.ByteBufMono;
+import reactor.netty.http.client.HttpClientResponse;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class ErrorMapping {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static <T> Function<String, Mono<T>> map(Class<T> c) {
-        return data -> {
-            try {
-                return Mono.just(mapper.readValue(data, c));
-            } catch (JsonProcessingException e) {
+    public static <T> BiFunction<HttpClientResponse, ByteBufMono, Mono<T>> map(Class<T> c) {
+        return (response, body) ->
+        {
+            if(response.status().code() == 403) return Mono.error(new Exceptions.WebFailure(403));
+            else return body.asString().map(str -> {
                 try {
-                    ResponseCode err = mapper.readValue(data, ResponseCode.class);
-                    return Mono.error(new Exceptions.WebFailure(err));
-                } catch (JsonProcessingException ee) {
-                    throw new Exceptions.JsonProblem("No parsable error");
+                    return mapper.readValue(str, c);
+                } catch (JsonProcessingException e) {
+                    throw new Exceptions.JsonProblem(e.getMessage());
                 }
-            }
+            });
         };
     }
 }

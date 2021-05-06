@@ -1,7 +1,7 @@
 package io.github.nathannorth.riotWrapper;
 
 import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
-import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIBuilder;
+import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClientBuilder;
 import io.github.nathannorth.riotWrapper.objects.ValRegion;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ public class TesterClass {
 
         //todo make response code have optional parameters
 
-        RiotDevelopmentAPIClient client = RiotDevelopmentAPIBuilder.builder()
+        RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
                 .addToken(getKeys().get(0))
                 .build()
                 .block();

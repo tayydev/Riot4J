@@ -1,7 +1,5 @@
 package io.github.nathannorth.riotWrapper.util;
 
-import io.github.nathannorth.riotWrapper.json.ResponseCode;
-
 public class Exceptions {
     public static class JsonProblem extends RuntimeException {
         public JsonProblem(String s) {
@@ -9,15 +7,15 @@ public class Exceptions {
         }
     }
     public static class WebFailure extends RuntimeException {
-        private final ResponseCode data;
+        private final int code;
 
-        public WebFailure(ResponseCode f) {
-            super("Web related exception with error code: " + f.status().status_code());
-            data = f;
+        public WebFailure(int code) {
+            super("Error code: " + code);
+            this.code = code;
         }
 
-        public ResponseCode getData() {
-            return data;
+        public int getCode() {
+            return code;
         }
     }
 
@@ -30,6 +28,17 @@ public class Exceptions {
     public static class InvalidTokenException extends RuntimeException {
         public InvalidTokenException(String s) {
             super(s);
+        }
+    }
+
+    public static class RateLimitedException extends RuntimeException {
+        private final int secs;
+        public RateLimitedException(int secs) {
+            this.secs = secs;
+        }
+
+        public int getSecs() {
+            return secs;
         }
     }
 }
