@@ -18,22 +18,25 @@ public class CleanLimitedQueue {
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
         Request request = new Request(r); //create a request
         in.tryEmitNext(request); //emmit request
-        return out() //get the first item in our out flux that matches our request id
+        return outCentral //get the first item in our out flux that matches our request id
                 .filter(completed -> completed.id == request.id)
                 .next()
                 .map(completed -> completed.result);
     }
 
+    private final Flux<Completed> outCentral = out().cache(0);
+
     //take everything in our in sink and flatmap it into a completed request. If we get 429 we wait it out and try again
     private Flux<Completed> out() {
-        return in.asFlux().flatMap(request -> conversion.apply(request)
+        return in.asFlux()
+                .flatMap(request -> conversion.apply(request)
                         .onErrorResume(error -> {
-                            if(error instanceof Exceptions.RateLimitedException) {
-                                System.out.println("Hit rate limit... delaying: " + ((Exceptions.RateLimitedException) error).getSecs() + " seconds.");
-                                return Mono.delay(Duration.ofSeconds(((Exceptions.RateLimitedException) error).getSecs()))
-                                        .flatMap(finished -> conversion.apply(request));
-                            }
-                            else return Mono.error(error);
+                        if(error instanceof Exceptions.RateLimitedException) {
+                            System.out.println("Hit rate limit... delaying: " + ((Exceptions.RateLimitedException) error).getSecs() + " seconds");
+                            return Mono.delay(Duration.ofSeconds(((Exceptions.RateLimitedException) error).getSecs()))
+                                    .flatMap(finished -> conversion.apply(request));
+                        }
+                        else return Mono.error(error);
                         }), 1);
     }
 

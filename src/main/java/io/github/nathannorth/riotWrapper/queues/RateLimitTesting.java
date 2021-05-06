@@ -9,9 +9,7 @@ import io.github.nathannorth.riotWrapper.util.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.retry.Retry;
 
-import java.beans.Expression;
 import java.time.Duration;
 import java.util.function.Function;
 
@@ -23,11 +21,12 @@ public class RateLimitTesting {
                 .build()
                 .block();
 
-        Flux<Object> stupid = Flux.interval(Duration.ofMillis(1000))
+        //todo this errors
+        Flux<Object> stupid = Flux.interval(Duration.ofMillis(100))
                 .flatMap(thing -> client.getValStatus(ValRegion.BRAZIL).doOnNext(status -> System.out.println("A - STATUS #" + thing + " " + status)));
 
-        Flux<Object> alsoStupid = Flux.interval(Duration.ofMillis(100))
-                .flatMap(thing -> client.getValStatus(ValRegion.BRAZIL).doOnNext(status -> System.out.println("B - STATUS #" + thing + " " + status)));
+//        Flux<Object> alsoStupid = Flux.interval(Duration.ofSeconds(2))
+//                .flatMap(thing -> client.getValStatus(ValRegion.BRAZIL).doOnNext(status -> System.out.println("B - STATUS #" + thing + " " + status)));
 
         Flux.merge(stupid).subscribe();
 
