@@ -1,8 +1,7 @@
-package io.github.nathannorth.riotWrapper;
+package io.github.nathannorth.riot4j;
 
-import io.github.nathannorth.riotWrapper.json.valContent.ActData;
-import io.github.nathannorth.riotWrapper.json.valContent.ContentData;
-import io.github.nathannorth.riotWrapper.util.Exceptions;
+import io.github.nathannorth.riot4j.json.valContent.ActData;
+import io.github.nathannorth.riot4j.json.valContent.ContentData;
 
 public class TestingHelper {
     public static ActData getAct(int episode, int act, ContentData contentData) {

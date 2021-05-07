@@ -1,9 +1,9 @@
-package io.github.nathannorth.riotWrapper.json;
+package io.github.nathannorth.riot4j.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import io.github.nathannorth.riotWrapper.util.Exceptions;
+import io.github.nathannorth.riot4j.util.Exceptions;
 
 import java.util.function.Function;
 

@@ -1,10 +1,12 @@
-package io.github.nathannorth.riotWrapper.json.valLeaderboard;
+package io.github.nathannorth.riot4j.json.valLeaderboard;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
 import java.util.Optional;
+
+//wraps a PlayerDto
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableLeaderboardPlayerData.class)

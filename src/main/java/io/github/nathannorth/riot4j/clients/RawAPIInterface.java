@@ -1,4 +1,4 @@
-package io.github.nathannorth.riotWrapper.clients;
+package io.github.nathannorth.riot4j.clients;
 
 import reactor.netty.http.client.HttpClient;
 

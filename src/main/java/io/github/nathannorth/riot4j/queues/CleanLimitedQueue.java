@@ -1,11 +1,10 @@
-package io.github.nathannorth.riotWrapper.queues;
+package io.github.nathannorth.riot4j.queues;
 
-import io.github.nathannorth.riotWrapper.util.Exceptions;
+import io.github.nathannorth.riot4j.util.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.concurrent.Queues;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -1,21 +1,18 @@
-package io.github.nathannorth.riotWrapper.queues;
+package io.github.nathannorth.riot4j.queues;
 
-import io.github.nathannorth.riotWrapper.TesterClass;
-import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
-import io.github.nathannorth.riotWrapper.objects.ValRegion;
-import io.github.nathannorth.riotWrapper.util.Exceptions;
+import io.github.nathannorth.riot4j.TesterClass;
+import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
+import io.github.nathannorth.riot4j.objects.ValRegion;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
-import java.util.function.Function;
 
 public class RateLimitTesting {
 
     public static void main(String[] args) {
         RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
-                .addToken(TesterClass.getKeys().get(0))
+                .addKey(TesterClass.getKeys().get(0))
                 .build()
                 .block();
 

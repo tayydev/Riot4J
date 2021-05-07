@@ -1,4 +1,4 @@
-package io.github.nathannorth.riotWrapper.objects;
+package io.github.nathannorth.riot4j.objects;
 
 public enum ValRegion {
     NORTH_AMERICA("NA"),

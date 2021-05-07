@@ -1,13 +1,8 @@
-package io.github.nathannorth.riotWrapper;
+package io.github.nathannorth.riot4j;
 
-import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
-import io.github.nathannorth.riotWrapper.json.valContent.ContentData;
-import io.github.nathannorth.riotWrapper.json.valLeaderboard.LeaderboardPlayerData;
-import io.github.nathannorth.riotWrapper.objects.ValActId;
-import io.github.nathannorth.riotWrapper.objects.ValLocale;
-import io.github.nathannorth.riotWrapper.objects.ValRegion;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
+import io.github.nathannorth.riot4j.objects.ValActId;
+import io.github.nathannorth.riot4j.objects.ValRegion;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,9 +15,15 @@ public class TesterClass {
         //todo note when i rename something
 
         RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
-                .addToken(getKeys().get(0))
+                .addKey(getKeys().get(0))
                 .build()
                 .block();
+
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
+                .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " - Player: " + playerData.gameName().orElse("anonymous"))
+                .doOnNext(info -> System.out.println(info))
+                .blockLast();
+
 
 //        client.getValStatus(ValRegion.ASIA_PACIFIC)
 //                .doOnNext(status -> System.out.println(status))
@@ -48,10 +49,22 @@ public class TesterClass {
 //            System.out.println("Name " + player.gameName());
 //            System.out.println("RR " + player.rankedRating());
 //        }
-        client.getLeaderboardInfinite(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_ONE, 234, 698)
-                .doOnNext(data -> System.out.println("Rank #" + data.leaderboardRank() + ", Player: " + data.gameName().orElse("Anonymous")))
-                .subscribe();
-        Mono.never().block();
+//        client.getLeaderboardFlux(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_TWO, 1, 634)
+//                .doOnNext(data -> System.out.println("Rank #" + data.leaderboardRank() + ", Player: " + data.gameName().orElse("Anonymous")))
+//                .subscribe();
+//        Mono.never().block();
+    }
+
+    private static void demo() {
+        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
+                .addKey("TOKEN")
+                .build()
+                .block();
+
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
+                .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " Player: " + playerData.gameName().orElse("anonymous"))
+                .doOnNext(info -> System.out.println(info))
+                .blockLast();
     }
 
     //keys.txt is stored in root dir and holds instance-specific data (eg. bot token)

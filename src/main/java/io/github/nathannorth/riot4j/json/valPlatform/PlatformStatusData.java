@@ -1,4 +1,4 @@
-package io.github.nathannorth.riotWrapper.json.valPlatform;
+package io.github.nathannorth.riot4j.json.valPlatform;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
