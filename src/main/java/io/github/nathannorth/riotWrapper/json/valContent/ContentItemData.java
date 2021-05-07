@@ -11,7 +11,6 @@ import java.util.Optional;
 @JsonDeserialize(as = ImmutableContentItemData.class)
 public interface ContentItemData {
     String name();
-    Optional<LocalizedNamesData> localizedNames();
     String id();
     String assetName();
     Optional<String> assetPath();

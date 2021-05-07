@@ -12,7 +12,6 @@ import java.util.Optional;
 public interface ActData {
     String name();
     String type(); //undocumented
-    Optional<LocalizedNamesData> localizedNames();
     String id();
     String parentId(); //undocumented
     Boolean isActive();

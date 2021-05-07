@@ -1,9 +1,7 @@
 package io.github.nathannorth.riotWrapper.queues;
 
 import io.github.nathannorth.riotWrapper.TesterClass;
-import io.github.nathannorth.riotWrapper.clients.RiotAPIClient;
 import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
-import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClientBuilder;
 import io.github.nathannorth.riotWrapper.objects.ValRegion;
 import io.github.nathannorth.riotWrapper.util.Exceptions;
 import reactor.core.publisher.Flux;

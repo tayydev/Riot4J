@@ -1,10 +1,7 @@
 package io.github.nathannorth.riotWrapper.clients;
 
-import reactor.netty.http.client.HttpClient;
-
-public class RiotAPIClient {
+public class RiotAPIClient extends RawAPIInterface {
     final String token;
-    final HttpClient webClient = HttpClient.create();;
 
     RiotAPIClient(String token) {
         this.token = token;

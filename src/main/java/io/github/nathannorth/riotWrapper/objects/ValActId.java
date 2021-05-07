@@ -1,9 +1,13 @@
 package io.github.nathannorth.riotWrapper.objects;
 
 public class ValActId {
-    String id;
-    private ValActId(String id) {
-        this.id = id;
+    private final String value;
+    private ValActId(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     //todo comment/ annotate unsafe
