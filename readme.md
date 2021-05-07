@@ -14,7 +14,10 @@ public final class Example {
                 .block();
 
         client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
-                .map(player -> "Rank: #" + player.leaderboardRank() + " - Name: " + player.gameName().orElse("Anonymous"))
+                .map(player -> 
+                        "Rank: #" + player.leaderboardRank() + 
+                        " - Name: " + player.gameName().orElse("Anonymous")
+                )
                 .doOnNext(info -> System.out.println(info))
                 .blockLast();
     }
