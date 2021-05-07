@@ -17,7 +17,9 @@ public class CleanLimitedQueue {
 
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
         Request request = new Request(r); //create a request
-        in.tryEmitNext(request); //emmit request
+
+        //todo not robust, if queue get overfilled will crash
+        in.tryEmitNext(request); //emit request
         return outCentral //get the first item in our out flux that matches our request id
                 .filter(completed -> completed.id == request.id)
                 .next()
@@ -46,10 +48,10 @@ public class CleanLimitedQueue {
             if(response.status().code() / 100 == 2)
                 return byteBufMono.asString();
             if(response.status().code() == 429)
-                throw new Exceptions.RateLimitedException(
+                throw new Exceptions.RateLimitedException(response,
                         Integer.parseInt(response.responseHeaders().get("Retry-After"))
                 );
-            else throw new RuntimeException("tbd");
+            else throw new Exceptions.WebFailure("Error in web request " + response.status().code(), response);
         })).map(str -> new Completed(request.id, str));
 
     private static class Request {

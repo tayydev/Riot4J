@@ -26,7 +26,7 @@
         <appender-ref ref="ASYNC"/>
     </root>
 
-<!--
-    <logger name="reactor.netty" level="WARN"/>
--->
+
+<!--    <logger name="reactor.netty" level="DEBUG"/>-->
+
 </configuration>

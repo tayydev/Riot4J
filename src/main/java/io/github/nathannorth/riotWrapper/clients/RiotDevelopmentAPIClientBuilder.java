@@ -6,7 +6,6 @@ import reactor.core.publisher.Mono;
 
 public class RiotDevelopmentAPIClientBuilder {
         private String token = null;
-        //todo redundant naming
 
         public RiotDevelopmentAPIClientBuilder addToken(String token) {
             this.token = token;
@@ -14,14 +13,12 @@ public class RiotDevelopmentAPIClientBuilder {
         }
 
         public Mono<RiotDevelopmentAPIClient> build() {
-            if (token == null) return Mono.error(new Exceptions.IncompleteClientException("Did not specify token."));
+            if (token == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
             RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(token);
             return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens
                     .onErrorResume(e -> {
                         if (e instanceof Exceptions.WebFailure) {
-                            //handle specific web errors
-                            int code = ((Exceptions.WebFailure) e).getCode();
-                            if (code == 403)
+                            if(((Exceptions.WebFailure) e).getResponse().status().code() == 403)
                                 return Mono.error(new Exceptions.InvalidTokenException("The token specified is not valid."));
                         }
                         return Mono.error(e);

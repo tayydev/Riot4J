@@ -1,13 +1,12 @@
 package io.github.nathannorth.riotWrapper.clients;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.nathannorth.riotWrapper.json.Mapping;
+import io.github.nathannorth.riotWrapper.json.valContent.ContentData;
+import io.github.nathannorth.riotWrapper.json.valPlatform.PlatformStatusData;
+import io.github.nathannorth.riotWrapper.objects.RiotLocale;
 import io.github.nathannorth.riotWrapper.queues.CleanLimitedQueue;
-import io.github.nathannorth.riotWrapper.json.platform.PlatformData;
 import io.github.nathannorth.riotWrapper.objects.ValRegion;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
-
-import java.io.IOException;
 
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
@@ -21,27 +20,19 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         return new RiotDevelopmentAPIClientBuilder();
     }
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    public Mono<PlatformData> getValStatus(ValRegion region) {
+    public Mono<PlatformStatusData> getValStatus(ValRegion region) {
         return queue.push(webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
                 .uri("https://" + region.getValue() + ".api.riotgames.com/val/status/v1/platform-data")
-        ).map(string -> {
-            try {
-                return mapper.readValue(string, PlatformData.class);
-            } catch (IOException exception) {
-                throw new RuntimeException("test");
-            }
-        });
+        ).map(Mapping.map(PlatformStatusData.class));
     }
 
-    //for debug
-    public HttpClient.ResponseReceiver<?> getPartialRequest(ValRegion region) {
-        return webClient
+    public Mono<ContentData> getValContent(ValRegion region, RiotLocale locale) {
+        return queue.push(webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + region.getValue() + ".api.riotgames.com/val/status/v1/platform-data");
+                .uri("https://" + region.getValue() + ".api.riotgames.com/val/content/v1/contents?locale=" + locale.getContent())
+        ).map(Mapping.map(ContentData.class));
     }
 }

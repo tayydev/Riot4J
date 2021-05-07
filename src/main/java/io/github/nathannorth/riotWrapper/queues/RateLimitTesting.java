@@ -21,6 +21,10 @@ public class RateLimitTesting {
                 .build()
                 .block();
 
+//        System.out.println(Integer.parseInt(System.getProperty("reactor.bufferSize.small", "256")));
+//
+//        Mono.never().block();
+
         //todo this errors
         Flux<Object> stupid = Flux.interval(Duration.ofMillis(100))
                 .flatMap(thing -> client.getValStatus(ValRegion.BRAZIL).doOnNext(status -> System.out.println("A - STATUS #" + thing + " " + status)));
@@ -50,27 +54,4 @@ public class RateLimitTesting {
 
         Mono.never().block();
     }
-
-    private static final Function<HttpClient.ResponseReceiver<?>, Mono<String>> theThing =
-            receiver -> receiver
-                    .responseSingle(((response, byteBufMono) -> {
-                        if (response.status().code() / 100 == 2) return byteBufMono.asString();
-                        //rate limiting
-                        if (response.status().code() == 429) {
-                            int secs = Integer.parseInt(response.responseHeaders().get("Retry-After")); //get retry-after
-                            System.out.println("Retrying after " + secs + " seconds.");
-                            throw new Exceptions.RateLimitedException(secs); //throw associated exception
-                        }
-                        throw new RuntimeException("Bad error type"); //temporarily scuffed
-                    }));
-
-
-
-//            .onErrorResume(e -> {
-//                if(e instanceof Exceptions.RateLimitedException) {
-//                    return receiver.responseSingle(((response, byteBufMono) -> byteBufMono.asString()))
-//                            .delayElement(Duration.ofSeconds(((Exceptions.RateLimitedException) e).getSecs()));
-//                }
-//                else return Mono.error(e);
-//            });
 }

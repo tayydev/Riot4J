@@ -1,7 +1,8 @@
 package io.github.nathannorth.riotWrapper;
 
 import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClient;
-import io.github.nathannorth.riotWrapper.clients.RiotDevelopmentAPIClientBuilder;
+import io.github.nathannorth.riotWrapper.json.valContent.ContentData;
+import io.github.nathannorth.riotWrapper.objects.RiotLocale;
 import io.github.nathannorth.riotWrapper.objects.ValRegion;
 
 import java.io.IOException;
@@ -12,14 +13,29 @@ import java.util.List;
 public class TesterClass {
     public static void main(String[] args) {
 
-        //todo make response code have optional parameters
+        //todo note when i rename something
 
         RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
                 .addToken(getKeys().get(0))
                 .build()
                 .block();
 
-        client.getValStatus(ValRegion.ASIA_PACIFIC).doOnNext(status -> System.out.println(status)).block();
+        client.getValStatus(ValRegion.ASIA_PACIFIC)
+                .doOnNext(status -> System.out.println(status))
+                .block();
+        //client.getValContent(ValRegion.NORTH_AMERICA, RiotLocale.US_ENGLISH).doOnNext(contentData -> System.out.println(contentData)).block();
+        client.getValContent(ValRegion.NORTH_AMERICA, RiotLocale.US_ENGLISH)
+                .map(contentData -> TestingHelper.getAct(2, 2, contentData).id())
+                .doOnNext(id -> System.out.println("Id found: " + id))
+                .block();
+
+        ContentData data = client.getValContent(ValRegion.NORTH_AMERICA, RiotLocale.US_ENGLISH).block();
+        for(int i = 1; i <= 3; i++) {
+            for(int ii = 1; ii <= 3; ii++) {
+                System.out.println("Id for " + i + ", " + ii);
+                System.out.println(TestingHelper.getAct(i, ii, data));
+            }
+        }
 
         //System.out.println(client.getValStatus(ValRegion.BRAZIL).block().toString());
     }
