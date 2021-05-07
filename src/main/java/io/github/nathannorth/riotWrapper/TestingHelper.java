@@ -18,6 +18,6 @@ public class TestingHelper {
                 return data;
             }
         }
-        throw new Exceptions.NoSuchActException("The act requested could not be found!");
+        return null;
     }
 }

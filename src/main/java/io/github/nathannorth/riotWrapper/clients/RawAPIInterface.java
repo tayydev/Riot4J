@@ -19,4 +19,11 @@ public class RawAPIInterface {
                 .get()
                 .uri("https://" + region + ".api.riotgames.com/val/content/v1/contents?locale=" + locale);
     }
+
+    HttpClient.ResponseReceiver<?> getValLeaderboardRaw(String token, String region, String actId, String size, String startIndex) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + region + ".api.riotgames.com/val/ranked/v1/leaderboards/by-act/" + actId + "?size=" + size + "&startIndex=" + startIndex);
+    }
 }

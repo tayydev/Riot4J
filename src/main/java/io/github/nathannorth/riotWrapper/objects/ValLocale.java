@@ -1,17 +1,30 @@
 package io.github.nathannorth.riotWrapper.objects;
 
-//todo is this riot locale or is this val locale?
-public class ValLocale {
-    private final String value;
+public enum ValLocale {
+    AE_ARABIC("ae-AE"),
+    DE_GERMAN("de-DE"),
+    US_ENGLISH("en-US"),
+    ES_SPANISH("es-ES"),
+    MX_SPANISH("es-MX"),
+    FR_FRENCH("fr-FR"),
+    ID_INDONESIAN("id-ID"),
+    IT_ITALIAN("it-IT"),
+    JP_JAPANESE("ja-JP"),
+    KO_KOREAN("ko-KR"),
+    PL_POLISH("pl-PL"),
+    BR_PORTUGUESE("pt-BR"),
+    RU_RUSSIAN("ru-RU"),
+    TR_TURKISH("tr-TR"),
+    TH_THAI("th-TH"),
+    VN_VIETNAMESE("vi-VN"),
+    TW_CHINESE("zh-TW");
 
-    private ValLocale(String value) {
+    String value;
+    ValLocale(String value) {
         this.value = value;
     }
 
     public String getValue() {
         return value;
     }
-
-    public static final ValLocale US_ENGLISH = new ValLocale("en-US");
-    public static final ValLocale FR_FRENCH = new ValLocale("fr-FR");
 }

@@ -43,10 +43,4 @@ public class Exceptions {
             return secs;
         }
     }
-
-    public static class NoSuchActException extends RuntimeException {
-        public NoSuchActException(String s) {
-            super(s);
-        }
-    }
 }

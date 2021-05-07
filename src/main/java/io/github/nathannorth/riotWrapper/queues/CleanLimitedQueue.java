@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public class CleanLimitedQueue {
     private static final AtomicInteger count = new AtomicInteger(0);
-    private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
+    private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
         Request request = new Request(r); //create a request
@@ -51,7 +51,9 @@ public class CleanLimitedQueue {
                 throw new Exceptions.RateLimitedException(response,
                         Integer.parseInt(response.responseHeaders().get("Retry-After"))
                 );
-            else throw new Exceptions.WebFailure("Error in web request " + response.status().code(), response);
+            else {
+                throw new Exceptions.WebFailure("Error in web request " + response.status().code(), response);
+            }
         })).map(str -> new Completed(request.id, str));
 
     private static class Request {
