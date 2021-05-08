@@ -6,7 +6,6 @@ Riot4J is built with [Project Reactor's](https://projectreactor.io/) [Netty](htt
 This example gets the top 2000 ranked VALORANT players in North America during Episode 2 Act 3 and prints their name and rank.
 ```java
 public final class Example {
-    
     public static void main(String[] args) {
         final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
                 .addKey(args[0])
