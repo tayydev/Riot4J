@@ -24,8 +24,8 @@ public final class Example {
 }
 ``` 
 # Features
-- **Reactive** - (I think) Riot4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol (I haven't actually read the whole thing so who knows)
-- **Automatic Rate Limiting** - Ok maybe the implementation of rate limiting is a little scuffed but you can always write your own
+- **Reactive** - I'm fairly confident Riot4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol (I haven't actually read the whole thing so who knows)
+- **Automatic Rate Limiting** - Ok maybe the implementation of rate limiting is a little scuffed, but you can always write your own
 - **Other Great Features** - I'm gonna be honest there isn't really anything else that's special about it. It exists?
 # Installation
 tbd

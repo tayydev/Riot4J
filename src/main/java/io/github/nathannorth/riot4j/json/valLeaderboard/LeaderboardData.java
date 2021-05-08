@@ -6,8 +6,9 @@ import org.immutables.value.Value;
 
 import java.util.List;
 
-//wraps a LeaderboardDto
-
+/**
+ * wraps a LeaderboardDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutableLeaderboardData.class)
 @JsonDeserialize(as = ImmutableLeaderboardData.class)

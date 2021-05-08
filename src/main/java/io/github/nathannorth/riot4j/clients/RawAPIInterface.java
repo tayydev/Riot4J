@@ -2,8 +2,10 @@ package io.github.nathannorth.riot4j.clients;
 
 import reactor.netty.http.client.HttpClient;
 
-//todo make sure package private does what i think it does
-public class RawAPIInterface {
+/**
+ * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting or mapping logic.
+ */
+public abstract class RawAPIInterface {
     final HttpClient webClient = HttpClient.create();;
 
     HttpClient.ResponseReceiver<?> getValStatusRaw(String token, String region) {

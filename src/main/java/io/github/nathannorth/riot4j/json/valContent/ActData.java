@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
-//wraps a ActDto
-
+/**
+ * wraps an ActDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutableActData.class)
 @JsonDeserialize(as = ImmutableActData.class)

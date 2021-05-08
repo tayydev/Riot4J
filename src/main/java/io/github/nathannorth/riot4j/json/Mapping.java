@@ -8,9 +8,7 @@ import io.github.nathannorth.riot4j.util.Exceptions;
 import java.util.function.Function;
 
 public class Mapping {
-    private static final ObjectMapper mapper = new ObjectMapper()
-            .registerModule(new Jdk8Module())
-            ;
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new Jdk8Module());
     public static <T> Function<String, T> map(Class<T> tClass) {
         return string -> {
             try {

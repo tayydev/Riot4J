@@ -6,8 +6,9 @@ import org.immutables.value.Value;
 
 import java.util.List;
 
-//wraps a StatusDto
-
+/**
+ * wraps a StatusDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutablePlatformEventData.class)
 @JsonDeserialize(as = ImmutablePlatformEventData.class)

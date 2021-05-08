@@ -19,7 +19,7 @@ public class TesterClass {
                 .build()
                 .block();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_ONE_ACT_THREE, 0, 2000)
                 .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " - Player: " + playerData.gameName().orElse("anonymous"))
                 .doOnNext(info -> System.out.println(info))
                 .blockLast();
@@ -61,7 +61,7 @@ public class TesterClass {
                 .build()
                 .block();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_ONE_ACT_ONE, 0, 2000)
                 .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " Player: " + playerData.gameName().orElse("anonymous"))
                 .doOnNext(info -> System.out.println(info))
                 .blockLast();

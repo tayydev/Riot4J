@@ -6,8 +6,9 @@ import org.immutables.value.Value;
 
 import java.util.List;
 
-//wraps a UpdateDto
-
+/**
+ * wraps an UpdateDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutableUpdateData.class)
 @JsonDeserialize(as = ImmutableUpdateData.class)

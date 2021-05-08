@@ -6,8 +6,9 @@ import org.immutables.value.Value;
 
 import java.util.Optional;
 
-//wraps a PlayerDto
-
+/**
+ * wraps a PlayerDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutableLeaderboardPlayerData.class)
 @JsonDeserialize(as = ImmutableLeaderboardPlayerData.class)

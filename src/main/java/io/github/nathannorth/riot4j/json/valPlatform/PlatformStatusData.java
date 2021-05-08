@@ -6,8 +6,9 @@ import org.immutables.value.Value;
 
 import java.util.List;
 
-//wraps a PlatformDataDto
-
+/**
+ * wraps a PlatformDataDto
+ */
 @Value.Immutable
 @JsonSerialize(as = ImmutablePlatformStatusData.class)
 @JsonDeserialize(as = ImmutablePlatformStatusData.class)
