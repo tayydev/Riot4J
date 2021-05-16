@@ -1,5 +1,9 @@
 package io.github.nathannorth.riot4j.objects;
 
+import io.github.nathannorth.riot4j.json.valPlatform.LocalizedContentData;
+
+import java.util.List;
+
 public enum ValLocale {
     AE_ARABIC("ae-AE"),
     DE_GERMAN("de-DE"),
@@ -19,12 +23,27 @@ public enum ValLocale {
     VN_VIETNAMESE("vi-VN"),
     TW_CHINESE("zh-TW");
 
-    String value;
+    private final String value;
     ValLocale(String value) {
         this.value = value;
     }
 
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Filters a given list for a specific locale
+     * @param list List of localizedContentData
+     * @param locale locale to filter for
+     * @return a single LocalizedContentData object
+     */
+    public static LocalizedContentData filterLocale(List<LocalizedContentData> list, ValLocale locale) {
+        for(LocalizedContentData data: list) {
+            if(data.locale().equals(locale.getValue().replace('-', '_'))) { //string .replace makes up for riot inconsistencies
+                return data;
+            }
+        }
+        return null;
     }
 }

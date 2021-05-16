@@ -12,17 +12,34 @@ import java.util.List;
 public class TesterClass {
     public static void main(String[] args) {
 
-        //todo note when i rename something
-
         RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
                 .addKey(getKeys().get(0))
                 .build()
                 .block();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_ONE_ACT_THREE, 0, 2000)
-                .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " - Player: " + playerData.gameName().orElse("anonymous"))
-                .doOnNext(info -> System.out.println(info))
-                .blockLast();
+        RiotDevelopmentAPIClient unsafe = RiotDevelopmentAPIClient.builder().addKey(getKeys().get(0)).buildUnsafe();
+
+        unsafe.getValStatus(ValRegion.BRAZIL).doOnNext(statusData -> System.out.println(statusData)).block();
+
+        //client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(5)).doOnNext($ -> System.out.println($)).blockLast();
+
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, client.getActs().block().getLatestActId(), 0, 2000)
+                .doOnNext(p -> System.out.println(p)).blockLast();
+
+
+
+        //client.getUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(5)).doOnNext(thing -> System.out.println(thing)).blockLast();
+
+//        PlatformStatusData blocked = client.getValStatus(ValRegion.NORTH_AMERICA).doOnNext(status -> System.out.println(status)).block();
+//
+//        System.out.println(client.getValUpdatePretty(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block());
+//
+//        Mono.never().block();
+//
+//        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_ONE_ACT_THREE, 0, 2000)
+//                .map(playerData -> "Rank: #" + playerData.leaderboardRank() + " - Player: " + playerData.gameName().orElse("anonymous"))
+//                .doOnNext(info -> System.out.println(info))
+//                .blockLast();
 
 
 //        client.getValStatus(ValRegion.ASIA_PACIFIC)

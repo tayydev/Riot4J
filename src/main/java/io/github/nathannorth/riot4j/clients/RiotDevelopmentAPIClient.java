@@ -5,14 +5,14 @@ import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardPlayerData;
 import io.github.nathannorth.riot4j.json.valPlatform.PlatformStatusData;
-import io.github.nathannorth.riot4j.objects.ValActId;
-import io.github.nathannorth.riot4j.objects.ValLocale;
-import io.github.nathannorth.riot4j.queues.CleanLimitedQueue;
-import io.github.nathannorth.riot4j.objects.ValRegion;
+import io.github.nathannorth.riot4j.objects.*;
+import io.github.nathannorth.riot4j.queues.LimitedQueue;
+import io.github.nathannorth.riot4j.util.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.util.*;
 
 /**
  * A DevelopmentClient is the core of this library. The client contains logic for rate limiting and mapping requests.
@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
-    private final CleanLimitedQueue rateLimiter = new CleanLimitedQueue();
+    private final LimitedQueue rateLimiter = new LimitedQueue();
     RiotDevelopmentAPIClient(String token) {
         super(token);
     }
@@ -44,6 +44,17 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                 .map(Mapping.map(PlatformStatusData.class));
     }
 
+    private PlatformStatusData lastData = null;
+    public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) {
+        return Flux.interval(duration).flatMap(num -> getValStatus(region)
+                .filter(status -> !status.equals(lastData)) //data must be changed
+                .map(newStatus -> {
+                    PlatformStatusData oldStatus = lastData;
+                    lastData = newStatus;
+                    return new ValStatusUpdateEvent(oldStatus, newStatus);
+                }));
+    }
+
     /**
      * Gets a ton of data from the game. Notably used to get ActIDs and game updates.
      * @param region Which VALORANT region to get data from
@@ -53,6 +64,15 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     public Mono<ContentData> getValContent(ValRegion region, ValLocale locale) {
         return rateLimiter.push(getValContentRaw(token, region.getValue(), locale.getValue()))
                 .map(Mapping.map(ContentData.class));
+    }
+
+    /**
+     * Get all ValActIds in an organized object
+     * @return a mono that evaluates to a ValActIdSet
+     */
+    public Mono<ValActIdSet> getActs() {
+        return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
+                .map(contentData -> new ValActIdSet(contentData.acts()));
     }
 
     /**
@@ -66,6 +86,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     public Mono<LeaderboardData> getValLeaderboardChunk(ValRegion region, ValActId actId, int startIndex, int size) {
         if(startIndex < 0) throw new IndexOutOfBoundsException("Start cannot be negative!");
         if(size > 200) throw new IndexOutOfBoundsException("Size cannot be greater than 200!");
+        //todo more robust checks
         return rateLimiter.push(getValLeaderboardRaw(token, region.getValue(), actId.getValue(), size + "", startIndex + ""))
                 .map(Mapping.map(LeaderboardData.class));
     }
@@ -92,5 +113,46 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                 })
                         .flatMap(num -> getValLeaderboardChunk(region, id, num, (int) Math.min(endIndex - num, 200))
                                 .flatMapMany(result -> Flux.fromIterable(result.players())), 1);
+    }
+
+    public static class RiotDevelopmentAPIClientBuilder {
+        private String key = null;
+
+        /**
+         * Gives a builder object an API key
+         * @param key your API key
+         * @return your builder with an updated API key
+         */
+        public RiotDevelopmentAPIClientBuilder addKey(String key) {
+                this.key = key;
+                return this;
+            }
+
+        /**
+         * Returns a mono of your builder that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
+         * @return a RiotDevelopmentAPIClient
+         */
+        public Mono<RiotDevelopmentAPIClient> build() {
+                if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
+                RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
+                return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens
+                        .onErrorResume(e -> {
+                            if (e instanceof Exceptions.WebFailure) {
+                                if(((Exceptions.WebFailure) e).getResponse().status().code() == 403)
+                                    return Mono.error(new Exceptions.InvalidTokenException("The token specified is not valid."));
+                            }
+                            return Mono.error(e);
+                        })
+                        .then(Mono.just(temp));
+        }
+
+        /**
+         * if you like to live life on the edge (or want to save resources) this method is for you
+         * @return a RiotDevelopmentAPIClient WITHOUT testing its API key.
+         */
+        public RiotDevelopmentAPIClient buildUnsafe() {
+            if (key == null) throw new Exceptions.IncompleteBuilderException("Did not specify token.");
+            return new RiotDevelopmentAPIClient(key);
+        }
     }
 }

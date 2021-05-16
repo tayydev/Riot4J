@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * wraps a StatusDto
@@ -14,12 +15,12 @@ import java.util.List;
 @JsonDeserialize(as = ImmutablePlatformEventData.class)
 public interface PlatformEventData {
     int id();
-    String maintenance_status();
-    String incident_severity();
+    Optional<String> maintenance_status(); //if its a patch, this exists
+    Optional<String> incident_severity(); //if its an incident, this exists
     List<LocalizedContentData> titles();
     List<UpdateData> updates();
     String created_at();
-    String archive_at();
-    String updated_at();
+    Optional<String> archive_at();
+    Optional<String> updated_at();
     List<String> platforms();
 }

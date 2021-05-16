@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-public class CleanLimitedQueue {
+public class LimitedQueue {
     private static final AtomicInteger count = new AtomicInteger(0);
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
