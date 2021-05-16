@@ -17,13 +17,9 @@ public class TesterClass {
                 .build()
                 .block();
 
-        RiotDevelopmentAPIClient unsafe = RiotDevelopmentAPIClient.builder().addKey(getKeys().get(0)).buildUnsafe();
-
-        unsafe.getValStatus(ValRegion.BRAZIL).doOnNext(statusData -> System.out.println(statusData)).block();
-
         //client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(5)).doOnNext($ -> System.out.println($)).blockLast();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, client.getActs().block().getLatestActId(), 0, 2000)
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_ONE_ACT_ONE, 0, 2000)
                 .doOnNext(p -> System.out.println(p)).blockLast();
 
 

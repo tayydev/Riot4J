@@ -16,8 +16,6 @@ public class LimitedQueue {
 
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
         Request request = new Request(r); //create a request
-
-        //todo not robust, if queue get overfilled will crash
         in.tryEmitNext(request); //emit request
         return outCentral //get the first item in our out flux that matches our request id
                 .filter(completed -> completed.id == request.id)

@@ -76,12 +76,12 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     /**
-     * Gets a chunk of the leaderboards and surrounds it with some other helpful data. See also: {@link #getValLeaderboards(ValRegion, ValActId, int, long)} for a easier to use method.
+     * Gets a chunk of the leaderboards and surrounds it with some other helpful data. See also: {@link #getValLeaderboards(ValRegion, ValActId, int, long)} for a user friendly method.
      * @param region Which VALORANT region to get data from
      * @param actId Which act to get data from - will 404 from any act before Episode Two
      * @param startIndex Where in the leaderboard get players from
      * @param size How many players to get
-     * @return a leaderboard object with a list of leaderboardplayers
+     * @return a leaderboard object with a list of LeaderboardPlayerData
      */
     public Mono<LeaderboardData> getValLeaderboardChunk(ValRegion region, ValActId actId, int startIndex, int size) {
         if(startIndex < 0) throw new IndexOutOfBoundsException("Start cannot be negative!");
@@ -129,7 +129,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
             }
 
         /**
-         * Returns a mono of your builder that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
+         * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
          * @return a RiotDevelopmentAPIClient
          */
         public Mono<RiotDevelopmentAPIClient> build() {
