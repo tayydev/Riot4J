@@ -27,6 +27,6 @@ public final class Example {
 - **Automatic Rate Limiting** - Riot4J automatically handles ratelimiting, so you shouldn't have to worry about those pesky 429 errors.
 - **Other Great Features** - It exists?
 # Installation
-tbd
+tbd 
 # Disclaimer
 Riot4J isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
