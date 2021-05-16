@@ -22,7 +22,7 @@ import java.util.*;
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
     private final LimitedQueue rateLimiter = new LimitedQueue();
-    RiotDevelopmentAPIClient(String token) {
+    private RiotDevelopmentAPIClient(String token) {
         super(token);
     }
 
