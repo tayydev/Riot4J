@@ -24,8 +24,8 @@ public final class Example {
 ``` 
 # Features
 - **Reactive** - I'm fairly confident Riot4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol (I haven't actually read the whole thing so who knows)
-- **Automatic Rate Limiting** - Riot4J automatically handles rate limiting, so you shouldn't have to worry about those pesky 429 errors.
-- **Convenience Methods** - Riot4J provides direct Jackson mappings of Riot's APIs, but also provides practical tools built on extending the usefulness of those objects
+- **Automatic Rate Limiting** - Riot4J automatically handles rate limiting, so you shouldn't have to worry about those pesky 429 errors
+- **Convenience Methods** - Riot4J does provide direct Jackson mappings of Riot's APIs, but it also provides practical tools to extend the usefulness of those objects
 - **Other Great Features** - It exists?
 # Installation
 tbd
