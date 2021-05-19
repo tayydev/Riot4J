@@ -16,11 +16,11 @@ public class LimitedQueue {
 
     public Mono<String> push(HttpClient.ResponseReceiver<?> r) {
         Request request = new Request(r); //create a request
-        //in.tryEmitNext(request); //emit request
         return outCentral //get the first item in our out flux that matches our request id
                 .filter(completed -> completed.id == request.id)
                 .next()
-                .map(completed -> completed.result).doOnSubscribe(sub -> in.tryEmitNext(request));
+                .map(completed -> completed.result)
+                .doOnSubscribe(sub -> in.tryEmitNext(request)); //emit to queue
     }
 
     private final Flux<Completed> outCentral = out().cache(0);
