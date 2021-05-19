@@ -45,11 +45,11 @@ public class LimitedQueue {
             if(response.status().code() / 100 == 2)
                 return byteBufMono.asString();
             if(response.status().code() == 429)
-                throw new Exceptions.RateLimitedException(response,
+                return Mono.error(new Exceptions.RateLimitedException(response,
                         Integer.parseInt(response.responseHeaders().get("Retry-After"))
-                );
+                ));
             else {
-                throw new Exceptions.WebFailure("Error in web request " + response.status().code(), response);
+                return Mono.error(new Exceptions.WebFailure("Error in web request " + response.status().code(), response));
             }
         })).map(str -> new Completed(request.id, str));
 
