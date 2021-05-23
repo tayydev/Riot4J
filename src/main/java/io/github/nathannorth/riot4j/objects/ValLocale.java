@@ -4,6 +4,9 @@ import io.github.nathannorth.riot4j.json.valPlatform.LocalizedContentData;
 
 import java.util.List;
 
+/**
+ * Val locales represent languages that Valorant supports
+ */
 public enum ValLocale {
     AE_ARABIC("ae-AE"),
     DE_GERMAN("de-DE"),

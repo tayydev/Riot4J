@@ -24,8 +24,17 @@ public class ValActIdSet {
             }
         }
     }
+
+    /**
+     * Gets an act id from a given episode and act
+     * @param episode
+     * @param act
+     * @return ValActId, will return null if episode and act dont exist
+     */
     public ValActId getActId(int episode, int act) {
-        return internalMap.get(episode).get(act);
+        Map<Integer, ValActId> epMap = internalMap.get(episode);
+        if(epMap == null) return null;
+        else return epMap.get(act);
     }
     public ValActId getLatestActId() {
         int episodeMax = Collections.max(internalMap.keySet());

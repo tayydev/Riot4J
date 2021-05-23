@@ -45,6 +45,13 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     private PlatformStatusData lastData = null;
+
+    /**
+     * Gets a flux that emits statusUpdateEvents whenever riots status for a given region changes. Checks are made on a given duration.
+     * @param region Region to get status from
+     * @param duration Duration to check for updates, not recommended to be set to anything under 1 second to avoid overflowing the ratelimit sink
+     * @return
+     */
     public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) {
         return Flux.interval(duration).flatMap(num -> getValStatus(region)
                 .filter(status -> !status.equals(lastData)) //data must be changed
@@ -109,6 +116,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                     for(long i = startIndex; i < Math.min(endIndex, data.totalPlayers() - 1); i += 200) {
                         temp.add(i);
                     }
+                    if(temp.size() == 0) return Flux.error(new IndexOutOfBoundsException("Outside of leaderboard range!"));
                     return Flux.fromIterable(temp);
                 })
                         .flatMap(num -> getValLeaderboardChunk(region, id, num, Math.min(endIndex - num, 200))
