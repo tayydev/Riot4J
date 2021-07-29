@@ -1,4 +1,4 @@
-package io.github.nathannorth.riot4j.objects;
+package io.github.nathannorth.riot4j.enums;
 
 import io.github.nathannorth.riot4j.json.valPlatform.LocalizedContentData;
 

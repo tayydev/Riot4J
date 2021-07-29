@@ -1,6 +1,9 @@
 package io.github.nathannorth.riot4j.clients;
 
+import io.github.nathannorth.riot4j.enums.ValLocale;
+import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.Mapping;
+import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardPlayerData;
@@ -21,8 +24,9 @@ import java.util.*;
  */
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
-    private final LimitedQueue rateLimiter = new LimitedQueue();
-    private RiotDevelopmentAPIClient(String token) {
+    //todo is protected OK?
+    protected final LimitedQueue rateLimiter = new LimitedQueue();
+    protected RiotDevelopmentAPIClient(String token) {
         super(token);
     }
 
@@ -32,6 +36,11 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      */
     public static RiotDevelopmentAPIClientBuilder builder() {
         return new RiotDevelopmentAPIClientBuilder();
+    }
+
+    public Mono<RiotAccountData> getRiotAccount(String name, String tagLine) {
+        return rateLimiter.push(getAccountByNameRaw(token, name, tagLine))
+                .map(Mapping.map(RiotAccountData.class));
     }
 
     /**
@@ -110,7 +119,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         if(startIndex < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         if(startIndex >= endIndex) return Flux.error(new IndexOutOfBoundsException("Invalid range!"));
         return getValLeaderboardChunk(region, id, 0, 1)
-                //todo make more efficient
+                //todo consider collecting list instead of making a flux
                 .flatMapMany(data -> {
                     ArrayList<Long> temp = new ArrayList<>();
                     for(long i = startIndex; i < Math.min(endIndex, data.totalPlayers() - 1); i += 200) {
@@ -140,7 +149,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
          * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
          * @return a RiotDevelopmentAPIClient
          */
-        public Mono<RiotDevelopmentAPIClient> build() {
+        public Mono<RiotDevelopmentAPIClient> getDevBuilder() {
                 if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
                 RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
                 return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens

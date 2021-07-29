@@ -28,4 +28,32 @@ public abstract class RawAPIInterface {
                 .get()
                 .uri("https://" + region + ".api.riotgames.com/val/ranked/v1/leaderboards/by-act/" + actId + "?size=" + size + "&startIndex=" + startIndex);
     }
+
+    HttpClient.ResponseReceiver<?> getRecentMatchesRaw(String token, String region, String queue) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + region + ".api.riotgames.com/val/match/v1/recent-matches/by-queue/" + queue);
+    }
+
+    HttpClient.ResponseReceiver<?> getMatchList(String token, String region, String puuid) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + region + ".api.riotgames.com/val/match/v1/matchlists/by-puuid/" + puuid);
+    }
+
+    HttpClient.ResponseReceiver<?> getMatchRaw(String token, String region, String matchId) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + region + ".api.riotgames.com//val/match/v1/matches/" + matchId);
+    }
+
+    HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String name, String tagLine) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get() //todo support alternate RiotRegions
+                .uri("https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
+    }
 }
