@@ -19,17 +19,17 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
     }
 
     public Mono<RecentMatchesData> getRecentMatches(ValRegion region, ValQueue queue) {
-        return rateLimiter.push(getRecentMatchesRaw(token, region.getValue(), queue.getValue()))
+        return rateLimiter.push(getRecentMatchesRaw(token, region.toString(), queue.toString()))
                 .map(Mapping.map(RecentMatchesData.class));
     }
 
     public Mono<MatchData> getMatch(ValRegion region, String matchId) {
-        return rateLimiter.push(getMatchRaw(token, region.getValue(), matchId))
+        return rateLimiter.push(getMatchRaw(token, region.toString(), matchId))
                 .map(Mapping.map(MatchData.class));
     }
 
     public Mono<MatchlistData> getMatchList(ValRegion region, String puuid) {
-        return rateLimiter.push(getMatchList(token, region.getValue(), puuid))
+        return rateLimiter.push(getMatchList(token, region.toString(), puuid))
                 .map(Mapping.map(MatchlistData.class));
     }
 

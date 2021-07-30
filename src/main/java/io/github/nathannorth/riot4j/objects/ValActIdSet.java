@@ -9,13 +9,16 @@ import java.util.Map;
 
 public class ValActIdSet {
     private final Map<Integer, Map<Integer, ValActId>> internalMap = new HashMap<>();
+    private final List<ActData> data;
     public ValActIdSet(List<ActData> data) {
-        for(ActData episode: data) {
+        this.data = data;
+
+        for(ActData episode: data) { //loop through unsorted acts
             if(episode.type().equals("episode") && !episode.name().equals("Closed Beta")) { //ignore closed beta
                 HashMap<Integer, ValActId> ids = new HashMap<>();
-                for(ActData act: data) {
-                    if(act.parentId().equals(episode.id())) {
-                        int num = Integer.parseInt(act.name().substring(4));
+                for(ActData act: data) { //loop through the same unsorted acts again
+                    if(act.parentId().equals(episode.id())) { //look for acts with the correct parentId
+                        int num = Integer.parseInt(act.name().substring(4)); //todo this should be regex
                         ids.put(num, ValActId.createUnvalidated(act.id()));
                     }
                 }
@@ -36,9 +39,19 @@ public class ValActIdSet {
         if(epMap == null) return null;
         else return epMap.get(act);
     }
-    public ValActId getLatestActId() {
-        int episodeMax = Collections.max(internalMap.keySet());
-        int actMax = Collections.max(internalMap.get(episodeMax).keySet());
-        return internalMap.get(episodeMax).get(actMax);
+    public ValActId getLatestActId() { //todo this returns nonexistent acts
+        for(ActData id: data) {
+            if(id.type().equals("act") && id.isActive()) {
+                return ValActId.createUnvalidated(id.id());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "ValActIdSet{" +
+                "internalMap=" + internalMap +
+                '}';
     }
 }

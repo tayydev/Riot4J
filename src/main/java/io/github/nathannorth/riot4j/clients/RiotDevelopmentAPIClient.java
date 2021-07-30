@@ -49,7 +49,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a PlatformStatusData containing any incidents / maintenance.
      */
     public Mono<PlatformStatusData> getValStatus(ValRegion region) {
-        return rateLimiter.push(getValStatusRaw(token, region.getValue()))
+        return rateLimiter.push(getValStatusRaw(token, region.toString()))
                 .map(Mapping.map(PlatformStatusData.class));
     }
 
@@ -78,7 +78,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a content object containing all characters, maps, chromas, skin(Levels)s, equips, gameModes, spray(Levels)s, charm(Levels)s, playerCards, playerTitles, and acts.
      */
     public Mono<ContentData> getValContent(ValRegion region, ValLocale locale) {
-        return rateLimiter.push(getValContentRaw(token, region.getValue(), locale.getValue()))
+        return rateLimiter.push(getValContentRaw(token, region.toString(), locale.toString()))
                 .map(Mapping.map(ContentData.class));
     }
 
@@ -103,7 +103,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         if(startIndex < 0) return Mono.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         if(size > 200) return Mono.error(new IndexOutOfBoundsException("Size cannot be greater than 200!"));
         //todo more robust checks
-        return rateLimiter.push(getValLeaderboardRaw(token, region.getValue(), actId.getValue(), size + "", startIndex + ""))
+        return rateLimiter.push(getValLeaderboardRaw(token, region.toString(), actId.toString(), size + "", startIndex + ""))
                 .map(Mapping.map(LeaderboardData.class));
     }
 
@@ -161,6 +161,17 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                             return Mono.error(e);
                         })
                         .then(Mono.just(temp));
+        }
+
+        /**
+         * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
+         * @return a RiotDevelopmentAPIClient
+         */
+        public Mono<RiotDevelopmentAPIClient> build() {
+            if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
+            RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
+            return temp.getValStatus(ValRegion.NORTH_AMERICA)
+                    .then(Mono.just(temp));
         }
 
         /**

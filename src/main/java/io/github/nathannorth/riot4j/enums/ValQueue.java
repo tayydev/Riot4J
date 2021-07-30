@@ -12,7 +12,7 @@ public enum ValQueue {
         this.value = value;
     }
 
-    public String getValue() {
+    public String toString() {
         return value;
     }
 }

@@ -31,7 +31,7 @@ public enum ValLocale {
         this.value = value;
     }
 
-    public String getValue() {
+    public String toString() {
         return value;
     }
 
@@ -43,7 +43,7 @@ public enum ValLocale {
      */
     public static LocalizedContentData filterLocale(List<LocalizedContentData> list, ValLocale locale) {
         for(LocalizedContentData data: list) {
-            if(data.locale().equals(locale.getValue().replace('-', '_'))) { //string .replace makes up for riot inconsistencies
+            if(data.locale().equals(locale.toString().replace('-', '_'))) { //string .replace makes up for riot inconsistencies
                 return data;
             }
         }
