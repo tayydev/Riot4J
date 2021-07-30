@@ -2,9 +2,7 @@ import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
 import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
 import io.github.nathannorth.riot4j.enums.ValQueue;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
-import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
-import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
 import io.github.nathannorth.riot4j.objects.ValActId;
 import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValRegion;
@@ -19,9 +17,9 @@ import java.util.List;
 public class ClientTest {
     @Test
     public void testDevClient() {
-        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
+        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.getDevBuilder()
                 .addKey(getKeys().get(0))
-                .getDevBuilder()
+                .build()
                 .block();
         assert client != null;
 
@@ -42,31 +40,25 @@ public class ClientTest {
                 .block();
         assert client != null;
 
-        MatchlistData matchList = client.getMatchList(ValRegion.NORTH_AMERICA, "6kUT4ZLSpWUc0FG2zzfQFbNOHxV2_m55JVJQbTqRUolkNuCaAVP5WqDsir4s4BLBQrwuFpZebarWLQ").block();
-
-        System.out.println(matchList);
-
-        MatchData match = client.getMatch(ValRegion.NORTH_AMERICA, "f960e3ef-388f-4847-8dea-daf299768cad").block();
-
-        System.out.println(match);
-
         RiotAccountData nate = client.getRiotAccount("nate", "asdf").block();
 
-        RecentMatchesData matches = client.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.COMPETITIVE).block();
+        MatchlistData matchList = client.getMatchList(ValRegion.NORTH_AMERICA, nate.puuid()).block();
 
-        System.out.println(nate + "\n" + matches);
+        client.getMatch(ValRegion.NORTH_AMERICA, matchList.history().get(0).matchId()).block();
+
+        client.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.COMPETITIVE).block();
     }
 
-    //@Test
+    @Test
     public void speedTest() {
-        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.builder()
+        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.getDevBuilder()
                 .addKey(getKeys().get(0))
-                .getDevBuilder()
+                .build()
                 .block();
         assert client != null;
 
+        System.out.println("Testing rate limiting:");
         client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
-                .doOnNext(e -> System.out.println(e))
                 .blockLast();
     }
 

@@ -34,7 +34,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * Initialize a new builder.
      * @return A builder object
      */
-    public static RiotDevelopmentAPIClientBuilder builder() {
+    public static RiotDevelopmentAPIClientBuilder getDevBuilder() {
         return new RiotDevelopmentAPIClientBuilder();
     }
 
@@ -149,7 +149,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
          * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
          * @return a RiotDevelopmentAPIClient
          */
-        public Mono<RiotDevelopmentAPIClient> getDevBuilder() {
+        public Mono<RiotDevelopmentAPIClient> build() {
                 if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
                 RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
                 return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens
@@ -161,17 +161,6 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                             return Mono.error(e);
                         })
                         .then(Mono.just(temp));
-        }
-
-        /**
-         * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
-         * @return a RiotDevelopmentAPIClient
-         */
-        public Mono<RiotDevelopmentAPIClient> build() {
-            if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
-            RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
-            return temp.getValStatus(ValRegion.NORTH_AMERICA)
-                    .then(Mono.just(temp));
         }
 
         /**
