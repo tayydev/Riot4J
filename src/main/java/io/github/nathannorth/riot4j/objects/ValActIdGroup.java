@@ -2,15 +2,14 @@ package io.github.nathannorth.riot4j.objects;
 
 import io.github.nathannorth.riot4j.json.valContent.ActData;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ValActIdSet {
+public class ValActIdGroup {
     private final Map<Integer, Map<Integer, ValActId>> internalMap = new HashMap<>();
     private final List<ActData> data;
-    public ValActIdSet(List<ActData> data) {
+    public ValActIdGroup(List<ActData> data) {
         this.data = data;
 
         for(ActData episode: data) { //loop through unsorted acts

@@ -5,7 +5,7 @@ public enum ValQueue {
     UNRATED("unrated"),
     SPIKE_RUSH("spikerush"),
     TOURNAMENTS("tournamentmode"); //todo test this
-    //todo other modes
+    //todo how do other modes work
 
     private final String value;
     ValQueue(String value) {

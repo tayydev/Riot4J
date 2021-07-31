@@ -15,7 +15,7 @@ public interface MatchInfoData {
     String provisioningFlowId();
     boolean isCompleted();
     String customGameName();
-    String queueId();
+    String queueId(); //empty is custom
     String gameMode();
     boolean isRanked();
     String seasonId();

@@ -14,7 +14,7 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
         super(token);
     }
 
-    public static RiotProductionAPIClientBuilder getProdBuilder() { //todo sort clash with superclass if i use just builder()
+    public static RiotProductionAPIClientBuilder getProdBuilder() {
         return new RiotProductionAPIClientBuilder();
     }
 
@@ -29,7 +29,7 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
     }
 
     public Mono<MatchlistData> getMatchList(ValRegion region, String puuid) {
-        return rateLimiter.push(getMatchList(token, region.toString(), puuid))
+        return rateLimiter.push(getMatchListRaw(token, region.toString(), puuid))
                 .map(Mapping.map(MatchlistData.class));
     }
 

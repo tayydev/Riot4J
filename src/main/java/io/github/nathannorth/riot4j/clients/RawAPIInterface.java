@@ -36,7 +36,7 @@ public abstract class RawAPIInterface {
                 .uri("https://" + region + ".api.riotgames.com/val/match/v1/recent-matches/by-queue/" + queue);
     }
 
-    HttpClient.ResponseReceiver<?> getMatchList(String token, String region, String puuid) {
+    HttpClient.ResponseReceiver<?> getMatchListRaw(String token, String region, String puuid) {
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()

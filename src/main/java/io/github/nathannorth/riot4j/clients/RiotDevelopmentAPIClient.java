@@ -86,9 +86,9 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * Get all ValActIds in an organized object
      * @return a mono that evaluates to a ValActIdSet
      */
-    public Mono<ValActIdSet> getActs() {
+    public Mono<ValActIdGroup> getActs() {
         return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
-                .map(contentData -> new ValActIdSet(contentData.acts()));
+                .map(contentData -> new ValActIdGroup(contentData.acts()));
     }
 
     /**
