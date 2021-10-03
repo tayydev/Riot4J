@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <!-- mess with these to debug-->
-    <logger name="io.netty" level="INFO"/>
-    <logger name="reactor" level="INFO"/>
+<!--    <logger name="io.netty" level="DEBUG"/>-->
+<!--    <logger name="reactor" level="DEBUG"/>-->
 
     <!-- Display the logs in your console with the following format -->
     <!-- You can learn more about this here: https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout -->

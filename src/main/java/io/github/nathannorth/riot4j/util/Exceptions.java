@@ -1,5 +1,6 @@
 package io.github.nathannorth.riot4j.util;
 
+import reactor.netty.ByteBufMono;
 import reactor.netty.http.client.HttpClientResponse;
 
 public class Exceptions {
@@ -22,20 +23,25 @@ public class Exceptions {
 
     public static class WebFailure extends RuntimeException {
         private final HttpClientResponse response;
+        private final String content;
 
-        public WebFailure(String in, HttpClientResponse response) {
-            super("Error code: " + in);
+        public WebFailure(HttpClientResponse response, String content) {
+            super("Error code: " + response.status().code());
             this.response = response;
+            this.content = content;
         }
 
         public HttpClientResponse getResponse() {
             return response;
         }
+        public String getContent() {
+            return content;
+        }
     }
     public static class RateLimitedException extends WebFailure {
         private final int secs;
-        public RateLimitedException(HttpClientResponse response, int secs) {
-            super("Rate limit error", response);
+        public RateLimitedException(HttpClientResponse response, String content, int secs) {
+            super(response, content);
             this.secs = secs;
         }
 

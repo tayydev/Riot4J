@@ -20,7 +20,7 @@ public class LimitedQueue {
                 .filter(completed -> completed.id == request.id)
                 .next()
                 .map(completed -> completed.result)
-                .doOnSubscribe(sub -> in.tryEmitNext(request)); //emit to queue
+                .doOnSubscribe(sub -> in.tryEmitNext(request)); //emit to queue *after* this Mono is subscribed to
     }
 
     private final Flux<Completed> outCentral = out().cache(0);
@@ -33,7 +33,7 @@ public class LimitedQueue {
                         if(error instanceof Exceptions.RateLimitedException) {
                             System.out.println("Hit rate limit... delaying: " + ((Exceptions.RateLimitedException) error).getSecs() + " seconds");
                             return Mono.delay(Duration.ofSeconds(((Exceptions.RateLimitedException) error).getSecs()))
-                                    .flatMap(finished -> conversion.apply(request));
+                                    .flatMap(finished -> conversion.apply(request)); //this is like some kind of recursive function usage
                         }
                         else return Mono.error(error);
                         }), 1);
@@ -42,14 +42,23 @@ public class LimitedQueue {
     //take a given request and make the web request. If the request 429s return a RateLimitException
     private final Function<Request, Mono<Completed>> conversion = request ->
         request.response.responseSingle(((response, byteBufMono) -> {
+            Mono<String> contentMono = byteBufMono.asString();
+
+            //no errors
             if(response.status().code() / 100 == 2)
-                return byteBufMono.asString();
+                return contentMono;
+            //rate limited
             if(response.status().code() == 429)
-                return Mono.error(new Exceptions.RateLimitedException(response,
-                        Integer.parseInt(response.responseHeaders().get("Retry-After"))
+                return contentMono.flatMap(content -> Mono.error( //save content todo test rate limiting since changes
+                        new Exceptions.RateLimitedException(response, content,
+                                Integer.parseInt(response.responseHeaders().get("Retry-After"))
+                        )
                 ));
+            //other error
             else {
-                return Mono.error(new Exceptions.WebFailure("Error in web request " + response.status().code(), response));
+                return contentMono.flatMap(val -> Mono.error( //we save content just in case its valuable
+                                new Exceptions.WebFailure(response, val)
+                ));
             }
         })).map(str -> new Completed(request.id, str));
 

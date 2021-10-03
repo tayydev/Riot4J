@@ -6,7 +6,7 @@ import reactor.netty.http.client.HttpClient;
  * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting, mapping logic, or convenience methods.
  */
 public abstract class RawAPIInterface {
-    final HttpClient webClient = HttpClient.create();;
+    final HttpClient webClient = HttpClient.create();
 
     HttpClient.ResponseReceiver<?> getValStatusRaw(String token, String region) {
         return webClient
@@ -47,7 +47,7 @@ public abstract class RawAPIInterface {
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + region + ".api.riotgames.com//val/match/v1/matches/" + matchId);
+                .uri("https://" + region + ".api.riotgames.com/val/match/v1/matches/" + matchId);
     }
 
     HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String name, String tagLine) {

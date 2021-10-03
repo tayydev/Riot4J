@@ -1,11 +1,12 @@
 import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
 import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
+import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValQueue;
+import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
+import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
 import io.github.nathannorth.riot4j.objects.ValActId;
-import io.github.nathannorth.riot4j.enums.ValLocale;
-import io.github.nathannorth.riot4j.enums.ValRegion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class ClientTest {
 
         MatchlistData matchList = client.getMatchList(ValRegion.NORTH_AMERICA, nate.puuid()).block();
 
-        client.getMatch(ValRegion.NORTH_AMERICA, matchList.history().get(0).matchId()).block();
+        MatchData match = client.getMatch(ValRegion.NORTH_AMERICA, matchList.history().get(0).matchId()).block();
 
         client.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.COMPETITIVE).block();
     }

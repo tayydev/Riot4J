@@ -27,5 +27,6 @@ public interface ContentData {
     List<ContentItemData> charmLevels();
     List<ContentItemData> playerCards();
     List<ContentItemData> playerTitles();
+    List<ContentItemData> ceremonies(); //undocumented
     List<ActData> acts();
 }

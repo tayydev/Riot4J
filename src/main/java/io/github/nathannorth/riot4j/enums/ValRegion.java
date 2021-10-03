@@ -4,7 +4,7 @@ package io.github.nathannorth.riot4j.enums;
  * Val regions represent valid regions to execute api calls against
  */
 public enum ValRegion {
-    NORTH_AMERICA("NA"),
+    NORTH_AMERICA("na"),
     BRAZIL("br"),
     EUROPE("eu"),
     LATIN_AMERICA("latam"),
