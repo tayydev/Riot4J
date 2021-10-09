@@ -1,6 +1,5 @@
 package io.github.nathannorth.riot4j.util;
 
-import reactor.netty.ByteBufMono;
 import reactor.netty.http.client.HttpClientResponse;
 
 public class Exceptions {
