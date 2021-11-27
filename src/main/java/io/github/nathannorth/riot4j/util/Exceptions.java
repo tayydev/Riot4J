@@ -36,6 +36,14 @@ public class Exceptions {
         public String getContent() {
             return content;
         }
+
+        @Override
+        public String toString() {
+            return "WebFailure{" +
+                    "response=" + response +
+                    ", content='" + content + '\'' +
+                    "} " + super.toString();
+        }
     }
     public static class RateLimitedException extends WebFailure {
         private final int secs;

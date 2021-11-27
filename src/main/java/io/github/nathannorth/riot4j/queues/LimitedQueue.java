@@ -56,7 +56,9 @@ public class LimitedQueue {
                 ));
             //other error
             else {
-                return contentMono.flatMap(val -> Mono.error( //we save content just in case its valuable
+                return contentMono
+                        .switchIfEmpty(Mono.just("")) //if we get an error with no body this stops our ratelimiter from just eating it
+                        .flatMap(val -> Mono.error( //we save content just in case its valuable
                                 new Exceptions.WebFailure(response, val)
                 ));
             }
