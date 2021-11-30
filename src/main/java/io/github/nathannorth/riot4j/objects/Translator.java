@@ -5,6 +5,7 @@ import io.github.nathannorth.riot4j.json.valContent.ContentItemData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchInfoData;
 
 import java.util.HashMap;
+import java.util.StringJoiner;
 
 /**
  * A translator parses data in the content endpoint to help turn outputs from other endpoints like the match endpoint into human-readable information
@@ -36,24 +37,23 @@ public class Translator {
     }
 
     /**
-     * A game TYPE is not the same as a game MODE or a game QUEUE. The queue represents the distinction between rated and unrated modes. The mode represents whether it is bomb mode or deathmatch, escalation, etc. The type is human readable description that provides only non-implied information.
+     * A game TYPE is not the same as a game MODE or a game QUEUE. The queue represents the distinction between rated and unrated modes. The mode represents whether it is bomb mode or deathmatch, escalation, etc. The type is human-readable description that provides only non-implied information.
      * @param matchInfoData
      * @return What a user would expect a description for a mode to be.
      */
     public String getGameTypeHuman(MatchInfoData matchInfoData) {
-        String prefix = "";
-        if(matchInfoData.queueId().equals(""))
-            prefix = "Custom ";
+        StringJoiner joiner = new StringJoiner(" ");
 
-        String suffix = "";
+        if(matchInfoData.queueId().equals(""))
+            joiner.add("Custom");
+
+        if(matchInfoData.queueId().equals("unrated")) joiner.add("Unrated");
+        if(matchInfoData.queueId().equals("competitive")) joiner.add("Competitive");
+
         String gameMode = gameModes.get(matchInfoData.gameMode());
         if(!gameMode.equals("Standard"))
-            suffix = gameMode;
+            joiner.add(gameMode);
 
-        String base = "";
-        if(matchInfoData.queueId().equals("unrated")) base = "Unrated";
-        if(matchInfoData.queueId().equals("competitive")) base = "Competitive";
-
-        return prefix + base + suffix;
+        return joiner.toString();
     }
 }
