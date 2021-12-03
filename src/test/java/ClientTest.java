@@ -8,6 +8,7 @@ import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
 import io.github.nathannorth.riot4j.objects.ValActId;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,6 +60,12 @@ public class ClientTest {
         assert client != null;
 
         System.out.println("Testing rate limiting:");
+
+        Flux.interval(Duration.ofSeconds(5)).flatMap(
+                sec -> client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH))
+                .doOnNext(e -> System.out.println("This message should play at regular 5 second intervals, regardless of rate limiting for the ranked endpoint..."))
+                .subscribe();
+
         client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
                 .blockLast();
     }

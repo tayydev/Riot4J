@@ -1,6 +1,7 @@
 package io.github.nathannorth.riot4j.queues;
 
-import io.github.nathannorth.riot4j.util.Exceptions;
+import io.github.nathannorth.riot4j.exceptions.Exceptions;
+import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
@@ -8,10 +9,10 @@ import reactor.netty.http.client.HttpClientResponse;
 
 import java.time.Duration;
 
-public class LimitedQueue {
+public class LegacyQueue {
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
-    public LimitedQueue() {
+    public LegacyQueue() {
         in.asFlux()
                 .flatMap(request -> evaluate(request), 1)
                 .subscribe();
@@ -31,9 +32,10 @@ public class LimitedQueue {
                 .doOnNext(result -> r.response.emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
                 .then()
                 .onErrorResume(error -> {
-                    if(error instanceof Exceptions.RateLimitedException) {
-                        System.out.println("Hit rate limit... delaying: " + ((Exceptions.RateLimitedException) error).getSecs() + " seconds");
-                        return Mono.delay(Duration.ofSeconds(((Exceptions.RateLimitedException) error).getSecs()))
+                    if(error instanceof RateLimitedException) {
+                        System.out.println("Hit rate limit... delaying: " + ((RateLimitedException) error).getSecs() + " seconds");
+                        System.out.println(((RateLimitedException) error).getResponse().responseHeaders());
+                        return Mono.delay(Duration.ofSeconds(((RateLimitedException) error).getSecs()))
                                 .flatMap(finished -> evaluate(r)); //try again
                     }
                     else return Mono.error(error);
@@ -47,15 +49,7 @@ public class LimitedQueue {
         //yes errors
         return contentMono
                 .switchIfEmpty(Mono.just("")) //make sure we don't eat errors w/out body
-                .flatMap(content -> { //save body of the error
-                    if(response.status().code() ==  429) { //rate limited error
-                        return Mono.error(new Exceptions.RateLimitedException(response, content,
-                                Integer.parseInt(response.responseHeaders().get("Retry-After"))));
-                    }
-                    else { //some other error
-                        return Mono.error(new Exceptions.WebFailure(response, content));
-                    }
-                });
+                .flatMap(content -> Mono.error(Exceptions.ofWebFailure(response, content)));
     }
 
     public static class Request {

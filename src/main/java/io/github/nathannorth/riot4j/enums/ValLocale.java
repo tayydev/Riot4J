@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Val locales represent languages that Valorant supports
  */
-public enum ValLocale {
+public enum ValLocale { //todo not every ValLocale is compatible with every ValRegion
     AE_ARABIC("ae-AE"),
     DE_GERMAN("de-DE"),
     US_ENGLISH("en-US"),

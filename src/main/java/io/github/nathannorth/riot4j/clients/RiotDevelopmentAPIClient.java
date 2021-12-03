@@ -2,20 +2,26 @@ package io.github.nathannorth.riot4j.clients;
 
 import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValRegion;
+import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
+import io.github.nathannorth.riot4j.exceptions.InvalidTokenException;
+import io.github.nathannorth.riot4j.exceptions.WebFailure;
 import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardPlayerData;
 import io.github.nathannorth.riot4j.json.valPlatform.PlatformStatusData;
-import io.github.nathannorth.riot4j.objects.*;
-import io.github.nathannorth.riot4j.queues.LimitedQueue;
-import io.github.nathannorth.riot4j.util.Exceptions;
+import io.github.nathannorth.riot4j.objects.Translator;
+import io.github.nathannorth.riot4j.objects.ValActId;
+import io.github.nathannorth.riot4j.objects.ValActIdGroup;
+import io.github.nathannorth.riot4j.objects.ValStatusUpdateEvent;
+import io.github.nathannorth.riot4j.queues.BucketManager;
+import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * A DevelopmentClient is the core of this library. The client contains logic for rate limiting and mapping requests.
@@ -25,10 +31,12 @@ import java.util.*;
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
     //todo is protected OK?
-    protected final LimitedQueue rateLimiter = new LimitedQueue();
+    protected final BucketManager buckets = new BucketManager();
+
     protected RiotDevelopmentAPIClient(String token) {
         super(token);
     }
+
 
     /**
      * Initialize a new builder.
@@ -39,7 +47,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     public Mono<RiotAccountData> getRiotAccount(String name, String tagLine) {
-        return rateLimiter.push(getAccountByNameRaw(token, name, tagLine))
+        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, name, tagLine))
                 .map(Mapping.map(RiotAccountData.class));
     }
 
@@ -49,7 +57,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a PlatformStatusData containing any incidents / maintenance.
      */
     public Mono<PlatformStatusData> getValStatus(ValRegion region) {
-        return rateLimiter.push(getValStatusRaw(token, region.toString()))
+        return buckets.pushToBucket(RateLimits.VAL_STATUS, getValStatusRaw(token, region.toString()))
                 .map(Mapping.map(PlatformStatusData.class));
     }
 
@@ -61,7 +69,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param duration Duration to check for updates, not recommended to be set to anything under 1 second to avoid overflowing the ratelimit sink
      * @return
      */
-    public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) {
+    public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) { //todo test or remove this
         return Flux.interval(duration).flatMap(num -> getValStatus(region)
                 .filter(status -> !status.equals(lastData)) //data must be changed
                 .map(newStatus -> {
@@ -78,7 +86,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a content object containing all characters, maps, chromas, skin(Levels)s, equips, gameModes, spray(Levels)s, charm(Levels)s, playerCards, playerTitles, and acts.
      */
     public Mono<ContentData> getValContent(ValRegion region, ValLocale locale) {
-        return rateLimiter.push(getValContentRaw(token, region.toString(), locale.toString()))
+        return buckets.pushToBucket(RateLimits.VAL_CONTENT, getValContentRaw(token, region.toString(), locale.toString()))
                 .map(Mapping.map(ContentData.class));
     }
 
@@ -89,6 +97,15 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     public Mono<ValActIdGroup> getActs() {
         return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
                 .map(contentData -> new ValActIdGroup(contentData.acts()));
+    }
+
+    /**
+     * Get a new translator object based on latest data
+     * @return a translator object up do date as of when the mono evaluates
+     */
+    public Mono<Translator> getTranslator() {
+        return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
+                .map(contentData -> new Translator(contentData));
     }
 
     /**
@@ -103,7 +120,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         if(startIndex < 0) return Mono.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         if(size > 200) return Mono.error(new IndexOutOfBoundsException("Size cannot be greater than 200!"));
         //todo more robust checks
-        return rateLimiter.push(getValLeaderboardRaw(token, region.toString(), actId.toString(), size + "", startIndex + ""))
+        return buckets.pushToBucket(RateLimits.VAL_RANKED, getValLeaderboardRaw(token, region.toString(), actId.toString(), size + "", startIndex + ""))
                 .map(Mapping.map(LeaderboardData.class));
     }
 
@@ -150,13 +167,13 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
          * @return a RiotDevelopmentAPIClient
          */
         public Mono<RiotDevelopmentAPIClient> build() {
-                if (key == null) return Mono.error(new Exceptions.IncompleteBuilderException("Did not specify token."));
+                if (key == null) return Mono.error(new IncompleteBuilderException("Did not specify token."));
                 RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
                 return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens
                         .onErrorResume(e -> {
-                            if (e instanceof Exceptions.WebFailure) {
-                                if(((Exceptions.WebFailure) e).getResponse().status().code() == 403)
-                                    return Mono.error(new Exceptions.InvalidTokenException("The token specified is not valid."));
+                            if (e instanceof WebFailure) {
+                                if(((WebFailure) e).getResponse().status().code() == 403)
+                                    return Mono.error(new InvalidTokenException("The token specified is not valid.")); //todo this isnt triggering
                             }
                             return Mono.error(e);
                         })
@@ -168,7 +185,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
          * @return a RiotDevelopmentAPIClient WITHOUT testing its API key.
          */
         public RiotDevelopmentAPIClient buildUnsafe() {
-            if (key == null) throw new Exceptions.IncompleteBuilderException("Did not specify token.");
+            if (key == null) throw new IncompleteBuilderException("Did not specify token.");
             return new RiotDevelopmentAPIClient(key);
         }
     }
