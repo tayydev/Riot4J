@@ -173,7 +173,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                         .onErrorResume(e -> {
                             if (e instanceof WebFailure) {
                                 if(((WebFailure) e).getResponse().status().code() == 403)
-                                    return Mono.error(new InvalidTokenException("The token specified is not valid.")); //todo this isnt triggering
+                                    return Mono.error(new InvalidTokenException("The token specified is not valid."));
                             }
                             return Mono.error(e);
                         })

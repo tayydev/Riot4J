@@ -23,6 +23,12 @@ public class BucketManager {
                                 //whenever a try makes it out of the method, we emit the result to the output mono and also tell the queue that it can start sending stuff again
                                 .doOnNext(result -> retryable.getResultHandle().emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
                                 .doOnNext(result -> retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST))
+                                //handle errors
+                                .onErrorResume(throwable -> {
+                                    retryable.getResultHandle().emitError(throwable, Sinks.EmitFailureHandler.FAIL_FAST); //output error to client
+                                    retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST); //an error is a success from the perspective of a bucket
+                                    return Mono.empty();
+                                })
                         , 1)
                 .subscribe();
     }

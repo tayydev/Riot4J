@@ -4,6 +4,7 @@ import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
+import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
 import io.github.nathannorth.riot4j.objects.ValActId;
@@ -27,7 +28,7 @@ public class ClientTest {
 
         client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(1)).blockFirst();
 
-        client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
+        ContentData content = client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
 
         client.getActs().map(acts -> acts.getActId(3, 1)).flatMapMany(actId ->
                 client.getValLeaderboards(ValRegion.NORTH_AMERICA, actId, 0, 1000))
