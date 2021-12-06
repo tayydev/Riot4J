@@ -1,6 +1,8 @@
 package io.github.nathannorth.riot4j.queues;
 
 import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
@@ -15,6 +17,8 @@ public class BucketManager {
     //map using enum for organization
     private final HashMap<RateLimits, Bucket> buckets = new HashMap<>();
     private final Sinks.Many<Retryable> in = Sinks.many().multicast().onBackpressureBuffer(1024, true);
+
+    private Logger log = LoggerFactory.getLogger(BucketManager.class);
 
     public BucketManager() {
         //use tries till the day we die. We attach two emissions to successful tries
@@ -31,6 +35,8 @@ public class BucketManager {
                                 })
                         , 1)
                 .subscribe();
+
+        log.info("BucketManager subscription started");
     }
 
     //recursive function to try making http requests
@@ -43,17 +49,18 @@ public class BucketManager {
 
                         //global rate limit
                         if(!rateLimitedError.isMethod()) {
-                            System.out.println("Hit GLOBAL rate limit! Delaying " + rateLimitedError.getSecs() + " seconds...");
+                            log.warn("BucketManager hit GLOBAL rate limit! Delaying " + rateLimitedError.getSecs() + " seconds");
                             return Mono.delay(Duration.ofSeconds(rateLimitedError.getSecs()))
                                     .flatMap(finished -> useATry(retryable)); //try again after failure
                         }
                         //method rate limit
                         else {
-                            System.out.println("Hit METHOD rate limit! Telling bucket to wait!");
+                            log.info("BucketManager hit METHOD rate limit! Telling bucket to wait");
                             retryable.getBucketHandle().emitError(rateLimitedError, Sinks.EmitFailureHandler.FAIL_FAST);
                             return Mono.empty(); //go on with our lives
                         }
                     }
+                    log.warn("Error passed through BucketMaster: " + error.toString());
                     return Mono.error(error); //some other error
                 });
     }

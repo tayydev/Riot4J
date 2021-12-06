@@ -3,6 +3,7 @@
     <!-- mess with these to debug-->
 <!--    <logger name="io.netty" level="DEBUG"/>-->
 <!--    <logger name="reactor" level="DEBUG"/>-->
+    <logger name ="io.github.nathannorth.riot4j" level="INFO"/>
 
     <!-- Display the logs in your console with the following format -->
     <!-- You can learn more about this here: https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout -->

@@ -2,6 +2,8 @@ package io.github.nathannorth.riot4j.queues;
 
 import io.github.nathannorth.riot4j.exceptions.Exceptions;
 import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
@@ -12,10 +14,14 @@ import java.time.Duration;
 public class LegacyQueue {
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
+    private Logger log = LoggerFactory.getLogger(LegacyQueue.class);
+
     public LegacyQueue() {
         in.asFlux()
                 .flatMap(request -> evaluate(request), 1)
                 .subscribe();
+
+        log.info("Legacy queue subscription started");
     }
 
     //push new item to the queue
@@ -34,7 +40,6 @@ public class LegacyQueue {
                 .onErrorResume(error -> {
                     if(error instanceof RateLimitedException) {
                         System.out.println("Hit rate limit... delaying: " + ((RateLimitedException) error).getSecs() + " seconds");
-                        System.out.println(((RateLimitedException) error).getResponse().responseHeaders());
                         return Mono.delay(Duration.ofSeconds(((RateLimitedException) error).getSecs()))
                                 .flatMap(finished -> evaluate(r)); //try again
                     }

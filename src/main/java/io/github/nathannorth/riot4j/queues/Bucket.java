@@ -1,6 +1,8 @@
 package io.github.nathannorth.riot4j.queues;
 
 import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
@@ -21,6 +23,8 @@ public class Bucket {
     //enum for logging
     private final RateLimits limit;
 
+    private Logger log = LoggerFactory.getLogger(Bucket.class);
+
     public Bucket(BucketManager master, RateLimits limit) {
         this.master = master;
         this.limit = limit;
@@ -29,6 +33,8 @@ public class Bucket {
         in.asFlux()
                 .flatMap(retryable -> useATry(retryable), 1)
                 .subscribe();
+
+        log.info("Bucket of limit " + limit.name() + " subscription started");
     }
 
     //a recursive function that pushes a retryable to the master queue, then waits to see if there is issue. If master
@@ -37,7 +43,7 @@ public class Bucket {
         return master.push(retryable)
                 .onErrorResume(e -> {
                     RateLimitedException rateLimitedException = (RateLimitedException) e; //we will only ever get this specific exception out of this sink, hence unchecked cast
-                    System.out.println("Got METHOD rate limit in bucket " + limit.name() + " from master! Delaying " + rateLimitedException.getSecs() + " seconds!");
+                    log.warn("Bucket " + limit.name() + " got METHOD rate limit from master! Delaying " + rateLimitedException.getSecs() + " seconds");
                     return Mono.delay(Duration.ofSeconds(rateLimitedException.getSecs()))
                             .flatMap(finished -> useATry(retryable));
                 });
