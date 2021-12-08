@@ -43,7 +43,10 @@ public class LegacyQueue {
                         return Mono.delay(Duration.ofSeconds(((RateLimitedException) error).getSecs()))
                                 .flatMap(finished -> evaluate(r)); //try again
                     }
-                    else return Mono.error(error);
+                    else {
+                        r.response.emitError(error, Sinks.EmitFailureHandler.FAIL_FAST);
+                        return Mono.empty();
+                    }
                 });
     }
 
