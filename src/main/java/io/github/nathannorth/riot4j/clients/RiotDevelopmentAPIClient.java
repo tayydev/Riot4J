@@ -31,9 +31,9 @@ import java.util.ArrayList;
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
     //todo is protected OK?
-    protected final BucketManager buckets = new BucketManager();
+    final BucketManager buckets = new BucketManager();
 
-    protected RiotDevelopmentAPIClient(String token) {
+    RiotDevelopmentAPIClient(String token) {
         super(token);
     }
 
@@ -46,8 +46,27 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         return new RiotDevelopmentAPIClientBuilder();
     }
 
+    /**
+     *
+     * @param name
+     * @param tagLine
+     * @return
+     */
     public Mono<RiotAccountData> getRiotAccount(String name, String tagLine) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, name, tagLine))
+        return getRiotAccount("americas", name, tagLine);
+    }
+
+    /**
+     * Gets a riot account from a name/tagline. note the parameter is a RIOT REGION, not a VAL REGION. There is no enum
+     * class for Riot Regions at this time. See also: {@link #getRiotAccount(String, String)} for an alternative that
+     * defaults to americas endpoint
+     * @param riotRegion a string representation of the desired RIOT region (eg 'americas' instead of 'na')
+     * @param name username to search for
+     * @param tagLine tag to search for
+     * @return returns a {@link WebFailure} with error code 404 if user not found
+     */
+    public Mono<RiotAccountData> getRiotAccount(String riotRegion, String name, String tagLine) {
+        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, riotRegion, name, tagLine))
                 .map(Mapping.map(RiotAccountData.class));
     }
 
@@ -136,7 +155,6 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         if(startIndex < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         if(startIndex >= endIndex) return Flux.error(new IndexOutOfBoundsException("Invalid range!"));
         return getValLeaderboardChunk(region, id, 0, 1)
-                //todo consider collecting list instead of making a flux
                 .flatMapMany(data -> {
                     ArrayList<Long> temp = new ArrayList<>();
                     for(long i = startIndex; i < Math.min(endIndex, data.totalPlayers() - 1); i += 200) {
@@ -169,7 +187,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         public Mono<RiotDevelopmentAPIClient> build() {
                 if (key == null) return Mono.error(new IncompleteBuilderException("Did not specify token."));
                 RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
-                return temp.getValStatus(ValRegion.NORTH_AMERICA) //todo find a better way of validating tokens
+                return temp.getValStatus(ValRegion.NORTH_AMERICA)
                         .onErrorResume(e -> {
                             if (e instanceof WebFailure) {
                                 if(((WebFailure) e).getResponse().status().code() == 403)

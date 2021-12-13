@@ -50,10 +50,10 @@ public abstract class RawAPIInterface {
                 .uri("https://" + region + ".api.riotgames.com/val/match/v1/matches/" + matchId);
     }
 
-    HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String name, String tagLine) {
+    HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String region, String name, String tagLine) {
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
-                .get() //todo support alternate RiotRegions
-                .uri("https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
+                .get()
+                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
     }
 }

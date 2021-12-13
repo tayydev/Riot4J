@@ -67,7 +67,7 @@ public class BucketManager {
 
     //when a bucket pushes to the manager we need to reset the handle it waits on, and then emit to our queue
     protected Mono<Boolean> push(Retryable r) {
-        r.setBucketHandle(Sinks.one()); //reset bucket handle todo can sinks have race conditions / backpressure?
+        r.setBucketHandle(Sinks.one()); //reset bucket handle
         in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
         return r.getBucketHandle().asMono();
     }

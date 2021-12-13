@@ -10,7 +10,7 @@ public enum ValRegion {
     LATIN_AMERICA("latam"),
     ASIA_PACIFIC("ap"),
     KOREA("kr"),
-    E_SPORTS("esports"); //todo what is the use of this
+    E_SPORTS("esports"); //note: NOT VALID for ranked endpoint
 
     private final String value;
     ValRegion(String value) {
