@@ -19,4 +19,8 @@ public class Mapping {
             }
         };
     }
+
+    public static ObjectMapper getMapper() {
+        return mapper;
+    }
 }
