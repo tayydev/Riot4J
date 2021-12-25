@@ -5,6 +5,7 @@ import io.github.nathannorth.riot4j.json.valContent.ContentItemData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchInfoData;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -55,5 +56,20 @@ public class Translator {
             joiner.add(gameMode);
 
         return joiner.toString();
+    }
+
+    //todo add unranked
+    private final Map<Integer, String> base = Map.of(
+            1, "Iron",
+            2, "Bronze",
+            3, "Silver",
+            4, "Gold",
+            5, "Platinum",
+            6, "Diamond",
+            7, "Immortal",
+            8, "Radiant"
+    );
+    public String getRankHuman(int competitiveTier) {
+        return base.get(competitiveTier / 3) + " " + (competitiveTier % 3 + 1);
     }
 }

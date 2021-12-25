@@ -43,7 +43,7 @@ public class ClientTest {
                 .block();
         assert client != null;
 
-        RiotAccountData nate = client.getRiotAccount("nate", "asdf").block();
+        RiotAccountData nate = client.getRiotAccountByName("nate", "asdf").block();
 
         MatchlistData matchList = client.getMatchList(ValRegion.NORTH_AMERICA, nate.puuid()).block();
 

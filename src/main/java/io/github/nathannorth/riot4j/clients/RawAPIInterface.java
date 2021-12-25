@@ -56,4 +56,11 @@ public abstract class RawAPIInterface {
                 .get()
                 .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
     }
+
+    HttpClient.ResponseReceiver<?> getAccountByPuuidRaw(String token, String region, String puuid) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-puuid/" + puuid);
+    }
 }

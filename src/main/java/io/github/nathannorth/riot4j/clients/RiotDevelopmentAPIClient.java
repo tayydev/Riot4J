@@ -52,21 +52,30 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param tagLine
      * @return
      */
-    public Mono<RiotAccountData> getRiotAccount(String name, String tagLine) {
-        return getRiotAccount("americas", name, tagLine);
+    public Mono<RiotAccountData> getRiotAccountByName(String name, String tagLine) {
+        return getRiotAccountByName("americas", name, tagLine);
     }
 
     /**
      * Gets a riot account from a name/tagline. note the parameter is a RIOT REGION, not a VAL REGION. There is no enum
-     * class for Riot Regions at this time. See also: {@link #getRiotAccount(String, String)} for an alternative that
+     * class for Riot Regions at this time. See also: {@link #getRiotAccountByName(String, String)} for an alternative that
      * defaults to americas endpoint
      * @param riotRegion a string representation of the desired RIOT region (eg 'americas' instead of 'na')
      * @param name username to search for
      * @param tagLine tag to search for
      * @return returns a {@link WebFailure} with error code 404 if user not found
      */
-    public Mono<RiotAccountData> getRiotAccount(String riotRegion, String name, String tagLine) {
+    public Mono<RiotAccountData> getRiotAccountByName(String riotRegion, String name, String tagLine) {
         return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, riotRegion, name, tagLine))
+                .map(Mapping.map(RiotAccountData.class));
+    }
+
+    //todo javadoc these and maybe address riot region vs other region
+    public Mono<RiotAccountData> getRiotAccountByPuuid(String puuid) {
+        return getRiotAccountByPuuid("americas", puuid);
+    }
+    public Mono<RiotAccountData> getRiotAccountByPuuid(String riotRegion, String puuid) {
+        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_PUUID, getAccountByPuuidRaw(token, riotRegion, puuid))
                 .map(Mapping.map(RiotAccountData.class));
     }
 
