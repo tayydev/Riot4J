@@ -5,6 +5,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 
+import java.nio.charset.StandardCharsets;
+
 public class Retryable {
     private final HttpClient.ResponseReceiver<?> httpRequest;
     private final Sinks.One<String> resultHandle = Sinks.one();
@@ -29,7 +31,7 @@ public class Retryable {
     //get an actionable http request for this retryable
     public Mono<String> getTry() {
         return httpRequest.responseSingle(((response, byteBufMono) -> {
-            Mono<String> contentMono = byteBufMono.asString();
+            Mono<String> contentMono = byteBufMono.asString(StandardCharsets.UTF_8); //manually set charset just in case
             //no errors
             if(response.status().code() / 100 == 2) return contentMono;
             //yes errors

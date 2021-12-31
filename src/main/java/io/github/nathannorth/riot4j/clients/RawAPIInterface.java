@@ -54,12 +54,12 @@ public abstract class RawAPIInterface {
     }
 
     HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String region, String name, String tagLine) {
-        name = URLEncoder.encode(name, StandardCharsets.UTF_8);
+        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
 
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
+                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + encodedName + "/" + tagLine);
     }
 
     HttpClient.ResponseReceiver<?> getAccountByPuuidRaw(String token, String region, String puuid) {
