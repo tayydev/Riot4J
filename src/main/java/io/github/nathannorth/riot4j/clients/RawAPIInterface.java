@@ -2,6 +2,9 @@ package io.github.nathannorth.riot4j.clients;
 
 import reactor.netty.http.client.HttpClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting, mapping logic, or convenience methods.
  */
@@ -51,6 +54,8 @@ public abstract class RawAPIInterface {
     }
 
     HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String region, String name, String tagLine) {
+        name = URLEncoder.encode(name, StandardCharsets.UTF_8);
+
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
