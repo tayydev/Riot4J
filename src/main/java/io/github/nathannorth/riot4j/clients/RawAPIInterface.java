@@ -53,19 +53,26 @@ public abstract class RawAPIInterface {
                 .uri("https://" + region + ".api.riotgames.com/val/match/v1/matches/" + matchId);
     }
 
-    HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String region, String name, String tagLine) {
+    HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String endpoint, String name, String tagLine) {
         String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
 
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + encodedName + "/" + tagLine);
+                .uri("https://" + endpoint + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + encodedName + "/" + tagLine);
     }
 
-    HttpClient.ResponseReceiver<?> getAccountByPuuidRaw(String token, String region, String puuid) {
+    HttpClient.ResponseReceiver<?> getAccountByPuuidRaw(String token, String endpoint, String puuid) {
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-puuid/" + puuid);
+                .uri("https://" + endpoint + ".api.riotgames.com/riot/account/v1/accounts/by-puuid/" + puuid);
+    }
+
+    HttpClient.ResponseReceiver<?> getActiveShardsByGame(String token, String endpoint, String game, String puuid) {
+        return webClient
+                .headers(head -> head.add("X-Riot-Token", token))
+                .get()
+                .uri("https://" + endpoint + ".api.riotgames.com/riot/account/v1/active-shards/by-game/" + game +"/by-puuid/" + puuid);
     }
 }

@@ -6,6 +6,7 @@ import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
 import io.github.nathannorth.riot4j.exceptions.InvalidTokenException;
 import io.github.nathannorth.riot4j.exceptions.WebFailure;
 import io.github.nathannorth.riot4j.json.Mapping;
+import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
@@ -30,10 +31,9 @@ import java.util.ArrayList;
  */
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
-    //todo is protected OK?
-    final BucketManager buckets = new BucketManager();
+    protected final BucketManager buckets = new BucketManager();
 
-    RiotDevelopmentAPIClient(String token) {
+    protected RiotDevelopmentAPIClient(String token) {
         super(token);
     }
 
@@ -44,6 +44,15 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      */
     public static RiotDevelopmentAPIClientBuilder getDevBuilder() {
         return new RiotDevelopmentAPIClientBuilder();
+    }
+
+    public Mono<ActiveShardData> getActiveShardsVal(String puuid) {
+        return getActiveShardsByGame("americas", "val", puuid);
+    }
+
+    public Mono<ActiveShardData> getActiveShardsByGame(String riotRegion, String game, String puuid) {
+        return buckets.pushToBucket(RateLimits.ACCOUNT_ACTIVE_SHARD_BY_GAME, getActiveShardsByGame(token, riotRegion, game, puuid))
+                .map(Mapping.map(ActiveShardData.class));
     }
 
     /**

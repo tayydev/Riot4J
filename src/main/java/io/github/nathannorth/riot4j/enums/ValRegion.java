@@ -1,5 +1,7 @@
 package io.github.nathannorth.riot4j.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Val regions represent valid regions to execute api calls against
  */
@@ -16,6 +18,8 @@ public enum ValRegion {
     ValRegion(String value) {
         this.value = value;
     }
+
+    @JsonValue
     public String toString() {
         return value;
     }

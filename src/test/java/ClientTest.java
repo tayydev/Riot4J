@@ -3,6 +3,7 @@ import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
 import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
+import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
@@ -45,9 +46,11 @@ public class ClientTest {
 
         RiotAccountData nate = client.getRiotAccountByName("nate", "asdf").block();
 
-        MatchlistData matchList = client.getMatchList(ValRegion.NORTH_AMERICA, nate.puuid()).block();
+        ActiveShardData loc = client.getActiveShardsVal(nate.puuid()).block();
 
-        MatchData match = client.getMatch(ValRegion.NORTH_AMERICA, matchList.history().get(0).matchId()).block();
+        MatchlistData matchList = client.getMatchList(loc.activeShard(), nate.puuid()).block();
+
+        MatchData match = client.getMatch(loc.activeShard(), matchList.history().get(0).matchId()).block();
 
         client.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.COMPETITIVE).block();
     }

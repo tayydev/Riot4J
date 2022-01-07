@@ -11,7 +11,7 @@ import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Mono;
 
 public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
-    private RiotProductionAPIClient(String token) {
+    protected RiotProductionAPIClient(String token) {
         super(token);
     }
 

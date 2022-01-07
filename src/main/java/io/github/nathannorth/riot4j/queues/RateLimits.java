@@ -5,6 +5,7 @@ public enum RateLimits {
     VAL_MATCHLIST("matchlists"),
     VAL_RECENT_MATCHES("recent"),
     VAL_CONTENT("content"),
+    ACCOUNT_ACTIVE_SHARD_BY_GAME("activeShards"),
     ACCOUNT_BY_RIOT_ID("accountRiotId"),
     ACCOUNT_BY_PUUID("accountPuuid"),
     ACTIVE_SHARDS("shards"),
