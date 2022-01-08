@@ -51,7 +51,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     public Mono<ActiveShardData> getActiveShardsByGame(String riotRegion, String game, String puuid) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_ACTIVE_SHARD_BY_GAME, getActiveShardsByGame(token, riotRegion, game, puuid))
+        return buckets.pushToBucket(RateLimits.ACCOUNT_ACTIVE_SHARD_BY_GAME, getActiveShardsByGameRaw(token, riotRegion, game, puuid))
                 .map(Mapping.map(ActiveShardData.class));
     }
 

@@ -12,8 +12,15 @@ public class Retryable {
     private final Sinks.One<String> resultHandle = Sinks.one();
     private Sinks.One<Boolean> bucketHandle = Sinks.one();
 
-    public Retryable(HttpClient.ResponseReceiver<?> httpRequest) {
+    private final RateLimits rateLimit;
+
+    public Retryable(HttpClient.ResponseReceiver<?> httpRequest, RateLimits rateLimit) {
         this.httpRequest = httpRequest;
+        this.rateLimit = rateLimit;
+    }
+
+    public RateLimits getRateLimit() {
+        return rateLimit;
     }
 
     public Sinks.One<String> getResultHandle() {
@@ -27,6 +34,8 @@ public class Retryable {
     public void setBucketHandle(Sinks.One<Boolean> bucketHandle) {
         this.bucketHandle = bucketHandle;
     }
+
+
 
     //get an actionable http request for this retryable
     public Mono<String> getTry() {
