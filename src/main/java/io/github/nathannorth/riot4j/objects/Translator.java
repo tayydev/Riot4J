@@ -1,10 +1,12 @@
 package io.github.nathannorth.riot4j.objects;
 
+import io.github.nathannorth.riot4j.enums.ValMatchType;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valContent.ContentItemData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchInfoData;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -71,5 +73,12 @@ public class Translator {
     );
     public String getRankHuman(int competitiveTier) {
         return base.get(competitiveTier / 3) + " " + (competitiveTier % 3 + 1);
+    }
+    public final ValMatchType getType(MatchInfoData info) {
+        if(info.isRanked()) return ValMatchType.COMPETITIVE;
+        if(info.queueId().equals("")) return ValMatchType.CUSTOM;
+        String guess = gameModes.get(info.gameMode()).toUpperCase(Locale.ROOT).replace(" ", "_");
+        if(guess.equals("STANDARD")) return ValMatchType.UNRATED;
+        else return ValMatchType.valueOf(guess);
     }
 }

@@ -23,6 +23,7 @@ public class BucketManager {
     public BucketManager() {
         //use tries till the day we die. We attach two emissions to successful tries
         in.asFlux()
+                .doOnNext(e -> log.debug("Retryable passing through BucketManager"))
                 .flatMap(retryable -> useATry(retryable)
                                 //whenever a try makes it out of the method, we emit the result to the output mono and also tell the queue that it can start sending stuff again
                                 .doOnNext(result -> retryable.getResultHandle().emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
@@ -34,6 +35,7 @@ public class BucketManager {
                                     return Mono.empty();
                                 })
                         , 1)
+                .doOnNext(e -> log.debug("Retryable completed in BucketManager"))
                 .subscribe();
 
         log.info("BucketManager subscription started");
@@ -74,6 +76,7 @@ public class BucketManager {
 
     //public method to access teh manager. Allows a user to push to a bucket given a key enum. Creates buckets as necessary.
     public Mono<String> pushToBucket(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
+        log.debug("Input pushed to bucket " + limit);
         Bucket bucket = buckets.computeIfAbsent(limit,
                 key -> new Bucket(this, key)
         );

@@ -51,6 +51,7 @@ public class Bucket {
 
     //push something to this bucket. generates a new retryable, emits it internally, and returns a mono that will eventually fulfill request
     Mono<String> push(HttpClient.ResponseReceiver<?> input) {
+        log.debug("Bucket " + limit + " got input");
         Retryable r = new Retryable(input);
         in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
         return r.getResultHandle().asMono();
