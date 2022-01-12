@@ -11,6 +11,7 @@ import java.util.Optional;
 @JsonDeserialize(as = ImmutableMatchlistEntryData.class)
 public interface MatchlistEntryData {
     String matchId();
+    String queueId();
     long gameStartTimeMillis();
     Optional<String> teamId();
 }
