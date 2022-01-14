@@ -91,6 +91,13 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
     public StatisticalValPlayer getStatisticalPlayer(String puuid) {
         PlayerData player = getPlayer(puuid);
 
+        if(player.stats().isEmpty()) throw new MatchParseException("Could not create StatisticalValPlayer. PlayerData has no stats.");
+
+        /**
+         * Counts headshots. Note: we do not filter shotguns at this time because there isn't a definite way to
+         * know, per-shot, whether it was done with a shotgun. Kill objects make the distinction between guns
+         * but *damage* objects, which are a more accurate measure of headshots, do not specify guns
+         */
         int headShots = 0;
         int totalShots = 0;
         for(RoundResultData round: roundResults()) {

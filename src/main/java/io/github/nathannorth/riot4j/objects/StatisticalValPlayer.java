@@ -1,6 +1,7 @@
 package io.github.nathannorth.riot4j.objects;
 
 import io.github.nathannorth.riot4j.enums.ValTeamId;
+import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerData;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerStatsData;
 
@@ -24,6 +25,11 @@ public class StatisticalValPlayer implements PlayerData {
 
     public float getHeadShotPercentage() {
         return headShotPercentage;
+    }
+
+    public String getKDA() {
+        PlayerStatsData stats = data.stats().get();
+        return stats.kills() + "/" + stats.deaths() + "/" + stats.assists();
     }
 
     @Override
