@@ -106,4 +106,8 @@ public class ValMatch implements MatchData {
         }
         throw new MatchParseException("Player not found!");
     }
+
+    public String scoreLine(String teamId) {
+        return null; //todo
+    }
 }
