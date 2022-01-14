@@ -1,13 +1,15 @@
 import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
 import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
 import io.github.nathannorth.riot4j.enums.ValLocale;
-import io.github.nathannorth.riot4j.enums.ValQueue;
+import io.github.nathannorth.riot4j.enums.ValQueueId;
+import io.github.nathannorth.riot4j.enums.ValRecentQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
+import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
 import io.github.nathannorth.riot4j.objects.ValActId;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -50,9 +52,13 @@ public class ClientTest {
 
         MatchlistData matchList = client.getMatchList(loc.activeShard(), nate.puuid()).block();
 
+        RecentMatchesData recentMatchesData = client.getRecentMatches(ValRegion.NORTH_AMERICA, ValRecentQueue.UNRATED).block();
+
         MatchData match = client.getMatch(loc.activeShard(), matchList.history().get(0).matchId()).block();
 
-        client.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.COMPETITIVE).block();
+        MatchData dm = client.getMatch(loc.activeShard(), Flux.fromIterable(matchList.history()).filter(e -> e.queueId().equals(ValQueueId.DEATHMATCH)).map(e -> e.matchId()).next().block()).block();
+
+        client.getRecentMatches(ValRegion.NORTH_AMERICA, ValRecentQueue.COMPETITIVE).block();
     }
 
     @Test

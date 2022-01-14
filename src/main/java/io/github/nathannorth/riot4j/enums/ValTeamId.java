@@ -1,7 +1,13 @@
 package io.github.nathannorth.riot4j.enums;
 
-public enum ValTeamId { //todo use this
-    BLUE("Blue") , RED("Red");
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum ValTeamId {
+    BLUE("Blue") ,
+    RED("Red"), 
+    @JsonEnumDefaultValue
+    DEATHMATCH("Deathmatch");
 
     private final String value;
 
@@ -10,6 +16,7 @@ public enum ValTeamId { //todo use this
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }

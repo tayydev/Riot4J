@@ -1,6 +1,6 @@
 package io.github.nathannorth.riot4j.clients;
 
-import io.github.nathannorth.riot4j.enums.ValQueue;
+import io.github.nathannorth.riot4j.enums.ValRecentQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
 import io.github.nathannorth.riot4j.json.Mapping;
@@ -20,7 +20,7 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
         return new RiotProductionAPIClientBuilder();
     }
 
-    public Mono<RecentMatchesData> getRecentMatches(ValRegion region, ValQueue queue) {
+    public Mono<RecentMatchesData> getRecentMatches(ValRegion region, ValRecentQueue queue) {
         return buckets.pushToBucket(RateLimits.VAL_RECENT_MATCHES, getRecentMatchesRaw(token, region.toString(), queue.toString()))
                 .map(Mapping.map(RecentMatchesData.class));
     }
@@ -56,7 +56,7 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
         public Mono<RiotProductionAPIClient> build() {
             if (key == null) return Mono.error(new IncompleteBuilderException("Did not specify token."));
             RiotProductionAPIClient temp = new RiotProductionAPIClient(key);
-            return temp.getRecentMatches(ValRegion.NORTH_AMERICA, ValQueue.UNRATED)
+            return temp.getRecentMatches(ValRegion.NORTH_AMERICA, ValRecentQueue.UNRATED)
                     .then(Mono.just(temp));
         }
     }

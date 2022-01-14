@@ -1,17 +1,17 @@
 package io.github.nathannorth.riot4j.enums;
 
-public enum ValQueue {
+public enum ValRecentQueue {
     COMPETITIVE("competitive"),
     UNRATED("unrated"),
     SPIKE_RUSH("spikerush"),
-    TOURNAMENTS("tournamentmode"); //todo test this
-    //todo how do other modes work
+    TOURNAMENTS("tournamentmode"); //non-functional
 
     private final String value;
-    ValQueue(String value) {
+    ValRecentQueue(String value) {
         this.value = value;
     }
 
+    @Override
     public String toString() {
         return value;
     }

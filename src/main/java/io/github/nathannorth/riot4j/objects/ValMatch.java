@@ -1,13 +1,19 @@
 package io.github.nathannorth.riot4j.objects;
 
+import io.github.nathannorth.riot4j.enums.ValQueueId;
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ValMatch implements MatchData, Comparable<ValMatch> {
+
     private final MatchData data;
+    public MatchData getData() {
+        return data;
+    }
 
     public ValMatch(MatchData data) {
         this.data = data;
@@ -118,12 +124,44 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         throw new MatchParseException("Player not found!");
     }
 
-    public String scoreLine(ValTeamId teamId) {
-        int rounds = 0;
-        for(RoundResultData round: roundResults()) {
-            if(round.winningTeam().equals(teamId)) rounds++;
+    public String scoreLine(PlayerData playerData) {
+        //funny deathmatch scoreline based on kills
+        if(matchInfo().queueId().equals(ValQueueId.DEATHMATCH)) {
+            //get list of players sorted by kills
+            List<PlayerData> players = new ArrayList<>(players()); //arraylist so modifiable
+            players.sort((a, b) -> {
+                if(a.stats().get().kills() > b.stats().get().kills()) {
+                    return -1;
+                }
+                else {
+                    return 1;
+                }
+            });
+
+            //if you win the deathmatch [yourScore]:[secondPlace]
+            if(players.get(0).puuid().equals(playerData.puuid())) {
+                return playerData.stats().get().kills() + ":" + players.get(1).stats().get().kills();
+            }
+            else { //if you lose the deathmatch [winnerScore]:[yourScore]
+                return playerData.stats().get().kills() + ":" + players.get(0).stats().get().kills();
+            }
         }
-        return rounds + ":" + (roundResults().size() - rounds);
+        List<TeamData> teams = new ArrayList<>(teams());
+        teams.sort((a, b) -> {
+            if(a.teamId().equals(playerData.teamId())) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
+        });
+
+
+        if(matchInfo().queueId().equals(ValQueueId.ESCALATION)) {
+            return teams.get(0).numPoints() + ":" + teams.get(1).numPoints(); //escalation uses points
+        } else {
+            return teams.get(0).roundsWon() + ":" + teams.get(1).roundsWon(); //everything else uses rounds
+        }
     }
 
     /**
@@ -133,7 +171,7 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
      */
     @Override
     public int compareTo(ValMatch o) {
-        if(o.matchInfo().gameStartMillis() > matchInfo().gameLengthMillis()) {
+        if(matchInfo().gameStartMillis() > o.matchInfo().gameStartMillis()) {
             return -1;
         }
         else {
