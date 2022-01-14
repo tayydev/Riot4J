@@ -2,6 +2,7 @@ package io.github.nathannorth.riot4j.json.valMatch;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.github.nathannorth.riot4j.enums.ValTeamId;
 import org.immutables.value.Value;
 
 import java.util.Optional;
@@ -13,5 +14,5 @@ public interface MatchlistEntryData {
     String matchId();
     String queueId();
     long gameStartTimeMillis();
-    Optional<String> teamId();
+    Optional<ValTeamId> teamId();
 }

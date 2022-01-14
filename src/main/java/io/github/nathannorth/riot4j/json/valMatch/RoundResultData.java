@@ -2,6 +2,7 @@ package io.github.nathannorth.riot4j.json.valMatch;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.github.nathannorth.riot4j.enums.ValTeamId;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface RoundResultData {
     int roundNum();
     String roundResult();
     String roundCeremony();
-    String winningTeam();
+    ValTeamId winningTeam();
     Optional<String> bombPlanter();
     Optional<String> bombDefuser();
     int plantRoundTime();

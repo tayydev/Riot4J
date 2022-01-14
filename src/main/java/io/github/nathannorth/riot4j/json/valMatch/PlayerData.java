@@ -2,6 +2,7 @@ package io.github.nathannorth.riot4j.json.valMatch;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.github.nathannorth.riot4j.enums.ValTeamId;
 import org.immutables.value.Value;
 
 import java.util.Optional;
@@ -13,7 +14,7 @@ public interface PlayerData {
     String puuid();
     String gameName();
     String tagLine();
-    String teamId();
+    ValTeamId teamId();
     String partyId();
     Optional<String> characterId(); //not provided for spectators
     Optional<PlayerStatsData> stats(); //not provided for spectators

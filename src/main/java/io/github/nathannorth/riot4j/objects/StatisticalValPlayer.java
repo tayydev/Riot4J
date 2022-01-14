@@ -1,5 +1,6 @@
 package io.github.nathannorth.riot4j.objects;
 
+import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerData;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerStatsData;
 
@@ -41,7 +42,7 @@ public class StatisticalValPlayer implements PlayerData {
     }
 
     @Override
-    public String teamId() {
+    public ValTeamId teamId() {
         return data.teamId();
     }
 

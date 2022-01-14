@@ -7,6 +7,7 @@ import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
 import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
+import io.github.nathannorth.riot4j.objects.ValMatch;
 import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Mono;
 
@@ -24,9 +25,10 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
                 .map(Mapping.map(RecentMatchesData.class));
     }
 
-    public Mono<MatchData> getMatch(ValRegion region, String matchId) {
+    public Mono<ValMatch> getMatch(ValRegion region, String matchId) {
         return buckets.pushToBucket(RateLimits.VAL_MATCH, getMatchRaw(token, region.toString(), matchId))
-                .map(Mapping.map(MatchData.class));
+                .map(Mapping.map(MatchData.class))
+                .map(matchData -> new ValMatch(matchData));
     }
 
     public Mono<MatchlistData> getMatchList(ValRegion region, String puuid) {

@@ -1,11 +1,12 @@
 package io.github.nathannorth.riot4j.objects;
 
+import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.*;
 
 import java.util.List;
 
-public class ValMatch implements MatchData {
+public class ValMatch implements MatchData, Comparable<ValMatch> {
     private final MatchData data;
 
     public ValMatch(MatchData data) {
@@ -51,7 +52,7 @@ public class ValMatch implements MatchData {
         return mvp;
     }
 
-    public PlayerData getTeamMVP(String teamId) {
+    public PlayerData getTeamMVP(ValTeamId teamId) {
         PlayerData mvp = null;
         int score = 0;
         for(PlayerData player: players()) {
@@ -65,14 +66,17 @@ public class ValMatch implements MatchData {
         return mvp;
     }
 
-    public String winningTeam() {
-        boolean blueWins = teams().get(0).teamId().equals("Blue") == teams().get(0).won();
-        if(blueWins) return "Blue";
-        return "Red";
+    public ValTeamId winningTeam() {
+        for(TeamData t: teams()) {
+            if(t.won()) {
+                return t.teamId();
+            }
+        }
+        throw new MatchParseException("No winning team!");
     }
 
-    public boolean isWinFor(PlayerData player) {
-        return player.teamId().equals(winningTeam());
+    public boolean isWinFor(String puuid) {
+        return getPlayer(puuid).teamId().equals(winningTeam());
     }
 
     public PlayerData getPlayer(String puuid) {
@@ -107,7 +111,26 @@ public class ValMatch implements MatchData {
         throw new MatchParseException("Player not found!");
     }
 
-    public String scoreLine(String teamId) {
-        return null; //todo
+    public String scoreLine(ValTeamId teamId) {
+        int rounds = 0;
+        for(RoundResultData round: roundResults()) {
+            if(round.winningTeam().equals(teamId)) rounds++;
+        }
+        return rounds + ":" + (roundResults().size() - rounds);
+    }
+
+    /**
+     * Sorts matches descending by time
+     * @param o match to compare to
+     * @return
+     */
+    @Override
+    public int compareTo(ValMatch o) {
+        if(o.matchInfo().gameStartMillis() > matchInfo().gameLengthMillis()) {
+            return -1;
+        }
+        else {
+            return 1;
+        }
     }
 }
