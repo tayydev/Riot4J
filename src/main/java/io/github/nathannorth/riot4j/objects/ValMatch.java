@@ -124,7 +124,7 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         throw new MatchParseException("Player not found!");
     }
 
-    public String scoreLine(PlayerData playerData) {
+    public String scoreLine(PlayerData playerData) { //todo should probably take a teamid
         //funny deathmatch scoreline based on kills
         if(matchInfo().queueId().equals(ValQueueId.DEATHMATCH)) {
             //get list of players sorted by kills

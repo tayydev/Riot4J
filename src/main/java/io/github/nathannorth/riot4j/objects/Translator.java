@@ -6,6 +6,7 @@ import io.github.nathannorth.riot4j.json.valContent.ContentItemData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchInfoData;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -14,8 +15,9 @@ import java.util.StringJoiner;
  */
 public class Translator {
     private final ContentData data;
-    private final HashMap<String, String> maps = new HashMap<>();
-    private final HashMap<String, String> gameModes = new HashMap<>();
+    private final Map<String, String> maps = new HashMap<>();
+    private final Map<String, String> gameModes = new HashMap<>();
+    private final Map<String, String> characters = new HashMap<>();
 
     /**
      * Instantiate a new Translator. A  translator may become out of date given a multi-week lifespan as it does not make any api call itself
@@ -32,10 +34,17 @@ public class Translator {
         for(ContentItemData mode: data.gameModes()) {
             gameModes.put(mode.assetPath().get(), mode.name());
         }
+        for(ContentItemData character: data.characters()) {
+            characters.put(character.id(), character.name());
+        }
     }
 
-    public String getMapName(String assetName) {
+    public String getMapNameHuman(String assetName) {
         return maps.get(assetName);
+    }
+
+    public String getCharacterNameHuman(String characterId) {
+        return characters.get(characterId.toUpperCase(Locale.ROOT));
     }
 
     /**
