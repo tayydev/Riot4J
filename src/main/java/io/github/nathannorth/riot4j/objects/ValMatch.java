@@ -1,6 +1,7 @@
 package io.github.nathannorth.riot4j.objects;
 
 import io.github.nathannorth.riot4j.enums.ValQueueId;
+import io.github.nathannorth.riot4j.enums.ValRoundResult;
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.*;
@@ -42,6 +43,22 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
     @Override
     public List<RoundResultData> roundResults() {
         return data.roundResults();
+    }
+
+    public int numDefuses(ValTeamId team) {
+        int returnable = 0;
+        for(RoundResultData round: roundResults()) {
+            if(round.winningTeam().equals(team) && round.roundResultCode().equals(ValRoundResult.BOMB_DEFUSED)) returnable ++;
+        }
+        return returnable;
+    }
+
+    public int numPlants(ValTeamId team) {
+        int returnable = 0;
+        for(RoundResultData round: roundResults()) {
+            if(round.bombPlanter().isPresent() && getPlayer(round.bombPlanter().get()).teamId().equals(team)) returnable++;
+        }
+        return returnable;
     }
 
     public PlayerData getMatchMVP() {
@@ -157,8 +174,8 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         });
 
 
-        if(matchInfo().queueId().equals(ValQueueId.ESCALATION)) {
-            return teams.get(0).numPoints() + ":" + teams.get(1).numPoints(); //escalation uses points
+        if(matchInfo().queueId().equals(ValQueueId.ESCALATION) || matchInfo().queueId().equals(ValQueueId.SNOWBALL_FIGHT)) {
+            return teams.get(0).numPoints() + ":" + teams.get(1).numPoints(); //escalation/snowball uses points
         } else {
             return teams.get(0).roundsWon() + ":" + teams.get(1).roundsWon(); //everything else uses rounds
         }

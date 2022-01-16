@@ -2,6 +2,7 @@ package io.github.nathannorth.riot4j.json.valMatch;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.github.nathannorth.riot4j.enums.ValRoundResult;
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import org.immutables.value.Value;
 
@@ -26,5 +27,5 @@ public interface RoundResultData {
     List<PlayerLocationData> defusePlayerLocations();
     LocationData defuseLocation();
     List<PlayerRoundStatsData> playerStats();
-    String roundResultCode();
+    ValRoundResult roundResultCode();
 }

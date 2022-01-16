@@ -1,13 +1,12 @@
 package io.github.nathannorth.riot4j.objects;
 
 import io.github.nathannorth.riot4j.enums.ValTeamId;
-import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerData;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerStatsData;
 
 import java.util.Optional;
 
-public class StatisticalValPlayer implements PlayerData {
+public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalValPlayer> {
     private final PlayerData data;
 
     private final int combatScore;
@@ -30,6 +29,11 @@ public class StatisticalValPlayer implements PlayerData {
     public String getKDA() {
         PlayerStatsData stats = data.stats().get();
         return stats.kills() + "/" + stats.deaths() + "/" + stats.assists();
+    }
+
+    @Override
+    public int compareTo(StatisticalValPlayer o) {
+        return o.combatScore - this.combatScore;
     }
 
     @Override
