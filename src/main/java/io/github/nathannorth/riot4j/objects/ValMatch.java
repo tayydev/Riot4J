@@ -95,7 +95,7 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
                 return t.teamId();
             }
         }
-        throw new MatchParseException("No winning team!");
+        return ValTeamId.TIE;
     }
 
     public boolean isWinFor(String puuid) {
