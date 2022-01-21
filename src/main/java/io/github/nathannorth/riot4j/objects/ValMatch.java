@@ -8,6 +8,7 @@ import io.github.nathannorth.riot4j.json.valMatch.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ValMatch implements MatchData, Comparable<ValMatch> {
 
@@ -100,17 +101,18 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         return mvp;
     }
 
-    public ValTeamId winningTeam() {
+    public Optional<ValTeamId> winningTeam() {
         for(TeamData t: teams()) {
             if(t.won()) {
-                return t.teamId();
+                return Optional.of(t.teamId());
             }
         }
-        return ValTeamId.TIE;
+        return Optional.empty();
     }
 
     public boolean isWinFor(String puuid) {
-        return getPlayer(puuid).teamId().equals(winningTeam());
+        if(winningTeam().isEmpty()) return false; // it isn't a win if you tie
+        return getPlayer(puuid).teamId().equals(winningTeam().get());
     }
 
     public PlayerData getPlayer(String puuid) {
@@ -152,9 +154,22 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         throw new MatchParseException("Player not found!");
     }
 
-    public String scoreLine(PlayerData playerData) { //todo should probably take a teamid
+    //returns a ValQueueId that represents what GAME MODE is being played eg. if it's a custom deathmatch then it returns deathmatch *instead* of custom
+    public ValQueueId gameModeAsQueue() {
+        String mode = matchInfo().gameMode();
+        if(mode.equals("/Game/GameModes/Bomb/BombGameMode.BombGameMode_C")) return ValQueueId.UNRATED;
+        if(mode.equals("/Game/GameModes/Deathmatch/DeathmatchGameMode.DeathmatchGameMode_C")) return ValQueueId.DEATHMATCH;
+        if(mode.equals("/Game/GameModes/GunGame/GunGameTeamsGameMode.GunGameTeamsGameMode_C")) return ValQueueId.ESCALATION;
+        if(mode.equals("/Game/GameModes/OneForAll/OneForAll_GameMode.OneForAll_GameMode_C")) return ValQueueId.REPLICATION;
+        if(mode.equals("/Game/GameModes/QuickBomb/QuickBombGameMode.QuickBombGameMode_C")) return ValQueueId.SPIKE_RUSH;
+        if(mode.equals("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C")) return ValQueueId.SNOWBALL_FIGHT;
+        throw new MatchParseException("No matching game mode found!");
+    }
+
+    //for use in conjunction with Translator#gameModeAsQueue
+    public String scoreLine(PlayerData playerData) {
         //funny deathmatch scoreline based on kills
-        if(matchInfo().queueId().equals(ValQueueId.DEATHMATCH)) {
+        if(gameModeAsQueue().equals(ValQueueId.DEATHMATCH)) {
             //get list of players sorted by kills
             List<PlayerData> players = new ArrayList<>(players()); //arraylist so modifiable
             players.sort((a, b) -> {

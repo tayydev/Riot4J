@@ -48,7 +48,7 @@ public class Translator {
     }
 
     /**
-     * A game TYPE is not the same as a game MODE or a game QUEUE. The queue represents the distinction between rated and unrated modes. The mode represents whether it is bomb mode or deathmatch, escalation, etc. The type is human-readable description that provides only non-implied information.
+     * A game TYPE is not the same as a game MODE or a game QUEUE. The queue represents the distinction between rated, custom, and unrated modes. The mode represents whether it is bomb mode or deathmatch, escalation, etc. The type is human-readable description that provides only non-implied information.
      * @param matchInfoData
      * @return What a user would expect a description for a mode to be.
      */
@@ -61,7 +61,7 @@ public class Translator {
         if(matchInfoData.queueId().equals(ValQueueId.UNRATED)) joiner.add("Unrated");
         if(matchInfoData.queueId().equals(ValQueueId.COMPETITIVE)) joiner.add("Competitive");
 
-        String gameMode = gameModes.get(matchInfoData.gameMode()); //this is kind of legacy but probably more foolproof than the brand-new queueid values
+        String gameMode = gameModes.get(matchInfoData.gameMode()); //this is kind of legacy but probably more foolproof than the brand-new queueid values todo just handwrite the game modes map?
         if(!gameMode.equals("Standard"))
             joiner.add(gameMode);
 
