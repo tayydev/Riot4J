@@ -61,6 +61,17 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         return returnable;
     }
 
+    //number of round excluding surrenders
+    public int numRoundsNoSurrenders() {
+        int returnable = 0;
+        for(RoundResultData round: roundResults()) {
+            if(!round.roundResultCode().equals(ValRoundResult.SURRENDERED)) {
+                returnable++;
+            }
+        }
+        return Math.max(returnable, 1); //avoid divide by zero by returning 1
+    }
+
     public PlayerData getMatchMVP() {
         PlayerData mvp = null;
         int score = 0;
@@ -131,7 +142,7 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
             }
         }
 
-        return new StatisticalValPlayer(player, player.stats().get().score() / roundResults().size(), (float) headShots / totalShots);
+        return new StatisticalValPlayer(player, player.stats().get().score() / numRoundsNoSurrenders(), (float) headShots / totalShots);
     }
 
     private static PlayerRoundStatsData getPlayerRound(RoundResultData round, String puuid) {
