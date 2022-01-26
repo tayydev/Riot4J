@@ -35,8 +35,6 @@ public class Retryable {
         this.bucketHandle = bucketHandle;
     }
 
-
-
     //get an actionable http request for this retryable
     public Mono<String> getTry() {
         return httpRequest.responseSingle(((response, byteBufMono) -> {

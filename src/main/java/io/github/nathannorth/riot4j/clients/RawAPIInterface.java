@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
  * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting, mapping logic, or convenience methods.
  */
 public abstract class RawAPIInterface {
+
     protected final HttpClient webClient = HttpClient.create();
 
     protected HttpClient.ResponseReceiver<?> getValStatusRaw(String token, String region) {
