@@ -1,4 +1,4 @@
-package io.github.nathannorth.riot4j.objects;
+package io.github.nathannorth.riot4j.api.match;
 
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.json.valMatch.PlayerData;

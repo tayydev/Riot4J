@@ -5,7 +5,6 @@ import io.github.nathannorth.riot4j.enums.ValRoundResult;
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.*;
-import io.github.nathannorth.riot4j.objects.StatisticalValPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

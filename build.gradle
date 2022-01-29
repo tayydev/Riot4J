@@ -20,8 +20,8 @@ dependencies {
     //jackson databind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.2'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.9.6'
-    implementation group: 'org.immutables', name: 'value', version: '2.8.8'
-    annotationProcessor "org.immutables:value:2.8.8"
+    implementation group: 'org.immutables', name: 'value', version: '2.9.0'
+    annotationProcessor 'org.immutables:value:2.9.0'
 
     //netty (includes reactor)
     compile 'io.projectreactor.netty:reactor-netty-http:1.0.15'
