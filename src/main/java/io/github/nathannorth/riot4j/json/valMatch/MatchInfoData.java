@@ -3,6 +3,7 @@ package io.github.nathannorth.riot4j.json.valMatch;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.github.nathannorth.riot4j.enums.ValQueueId;
+import io.github.nathannorth.riot4j.objects.ValActId;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -19,5 +20,5 @@ public interface MatchInfoData {
     ValQueueId queueId(); //empty is custom
     String gameMode();
     boolean isRanked();
-    String seasonId();
+    ValActId seasonId();
 }

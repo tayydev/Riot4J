@@ -10,12 +10,14 @@ public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalV
     private final PlayerData data;
 
     private final int combatScore;
-    private final float headShotPercentage;
+    private final int totalShots;
+    private final int headshots;
 
-    public StatisticalValPlayer(PlayerData data, int combatScore, float headShotPercentage) {
+    public StatisticalValPlayer(PlayerData data, int combatScore, int totalShots, int headshots) {
         this.data = data;
         this.combatScore = combatScore;
-        this.headShotPercentage = headShotPercentage;
+        this.totalShots = totalShots;
+        this.headshots = headshots;
     }
 
     public int getCombatScore() {
@@ -23,12 +25,20 @@ public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalV
     }
 
     public float getHeadShotPercentage() {
-        return headShotPercentage;
+        return (float) headshots / totalShots;
     }
 
     public String getKDA() {
         PlayerStatsData stats = data.stats().get();
         return stats.kills() + "/" + stats.deaths() + "/" + stats.assists();
+    }
+
+    public int getTotalShots() {
+        return totalShots;
+    }
+
+    public int getHeadshots() {
+        return headshots;
     }
 
     @Override

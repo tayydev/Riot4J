@@ -39,6 +39,10 @@ public class Translator {
         }
     }
 
+    public ValActIdGroup getActs() {
+        return new ValActIdGroup(data.acts());
+    }
+
     public String getMapNameHuman(String assetName) {
         return maps.get(assetName);
     }

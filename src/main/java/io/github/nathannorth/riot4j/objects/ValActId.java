@@ -1,6 +1,9 @@
 package io.github.nathannorth.riot4j.objects;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public class ValActId {
+    @JsonValue
     private final String value;
     private ValActId(String value) {
         this.value = value;
@@ -24,5 +27,15 @@ public class ValActId {
      */
     public static ValActId createUnvalidated(String id) {
         return new ValActId(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ValActId valActId = (ValActId) o;
+
+        return valActId.toString().equals(toString());
     }
 }

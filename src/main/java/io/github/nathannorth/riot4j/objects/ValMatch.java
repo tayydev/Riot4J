@@ -144,7 +144,7 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
             }
         }
 
-        return new StatisticalValPlayer(player, player.stats().get().score() / numRoundsNoSurrenders(), (float) headShots / totalShots);
+        return new StatisticalValPlayer(player, player.stats().get().score() / numRoundsNoSurrenders(), totalShots, headShots);
     }
 
     private static PlayerRoundStatsData getPlayerRound(RoundResultData round, String puuid) {
