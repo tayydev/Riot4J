@@ -62,6 +62,35 @@ public class ClientTest {
     }
 
     @Test
+    public void cacheTest() {
+        final RiotProductionAPIClient client = RiotProductionAPIClient.getProdBuilder()
+                .addKey(getKeys().get(1))
+                .build()
+                .block();
+        assert client != null;
+
+        RiotAccount nate = client.getRiotAccountByName("nate", "asdf").block();
+
+        nate.getRegion().block();
+
+        System.out.println("First region got.");
+
+        nate.getRegion().block();
+
+        System.out.println("Second region got.");
+
+        ValMatchlist matchList = client.getMatchList(nate).block();
+
+        matchList.history().get(0).getValMatch().block();
+
+        System.out.println("First match got.");
+
+        matchList.history().get(0).getValMatch().block();
+
+        System.out.println("Second match got.");
+    }
+
+    @Test
     public void speedTest() {
         final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.getDevBuilder()
                 .addKey(getKeys().get(0))

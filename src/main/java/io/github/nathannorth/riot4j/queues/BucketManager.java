@@ -76,10 +76,12 @@ public class BucketManager {
 
     //public method to access teh manager. Allows a user to push to a bucket given a key enum. Creates buckets as necessary.
     public Mono<String> pushToBucket(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
-        log.debug("Input pushed to bucket " + limit);
-        Bucket bucket = buckets.computeIfAbsent(limit,
-                key -> new Bucket(this, key)
-        );
-        return bucket.push(input);
+        return Mono.defer(() -> { //defer to prevent accidental early subscription
+            log.debug("Input pushed to bucket " + limit);
+            Bucket bucket = buckets.computeIfAbsent(limit,
+                    key -> new Bucket(this, key)
+            );
+            return bucket.push(input);
+        });
     }
 }

@@ -12,10 +12,17 @@ public class ValMatchlist {
     private final MatchlistData data;
     private final ValRegion region;
 
+    private final List<MatchlistEntry> history;
+
     public ValMatchlist(RiotProductionAPIClient parent, MatchlistData data, ValRegion region) {
         this.parent = parent;
         this.data = data;
         this.region = region;
+
+        history = data.history()
+                .stream()
+                .map(entry -> new MatchlistEntry(parent, entry, region))
+                .collect(Collectors.toList());
     }
 
     public String puuid() {
@@ -23,10 +30,7 @@ public class ValMatchlist {
     }
 
     public List<MatchlistEntry> history() {
-        return data.history()
-                .stream()
-                .map(entry -> new MatchlistEntry(parent, entry, region))
-                .collect(Collectors.toList());
+        return history;
     }
 
     public MatchlistData getData() {
