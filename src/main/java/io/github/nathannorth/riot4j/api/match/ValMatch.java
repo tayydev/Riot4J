@@ -1,18 +1,20 @@
-package io.github.nathannorth.riot4j.objects;
+package io.github.nathannorth.riot4j.api.match;
 
 import io.github.nathannorth.riot4j.enums.ValQueueId;
 import io.github.nathannorth.riot4j.enums.ValRoundResult;
 import io.github.nathannorth.riot4j.enums.ValTeamId;
 import io.github.nathannorth.riot4j.exceptions.MatchParseException;
 import io.github.nathannorth.riot4j.json.valMatch.*;
+import io.github.nathannorth.riot4j.objects.StatisticalValPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ValMatch implements MatchData, Comparable<ValMatch> {
+public class ValMatch implements Comparable<ValMatch> {
 
     private final MatchData data;
+
     public MatchData getData() {
         return data;
     }
@@ -21,27 +23,22 @@ public class ValMatch implements MatchData, Comparable<ValMatch> {
         this.data = data;
     }
 
-    @Override
     public MatchInfoData matchInfo() {
         return data.matchInfo();
     }
 
-    @Override
     public List<PlayerData> players() {
         return data.players();
     }
 
-    @Override
     public List<CoachData> coaches() {
         return data.coaches();
     }
 
-    @Override
     public List<TeamData> teams() {
         return data.teams();
     }
 
-    @Override
     public List<RoundResultData> roundResults() {
         return data.roundResults();
     }

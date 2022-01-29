@@ -1,5 +1,6 @@
 package io.github.nathannorth.riot4j.clients;
 
+import io.github.nathannorth.riot4j.api.account.RiotAccount;
 import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
@@ -61,7 +62,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param tagLine
      * @return
      */
-    public Mono<RiotAccountData> getRiotAccountByName(String name, String tagLine) {
+    public Mono<RiotAccount> getRiotAccountByName(String name, String tagLine) {
         return getRiotAccountByName("americas", name, tagLine);
     }
 
@@ -74,18 +75,20 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param tagLine tag to search for
      * @return returns a {@link WebFailure} with error code 404 if user not found
      */
-    public Mono<RiotAccountData> getRiotAccountByName(String riotRegion, String name, String tagLine) {
+    public Mono<RiotAccount> getRiotAccountByName(String riotRegion, String name, String tagLine) {
         return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, riotRegion, name, tagLine))
-                .map(Mapping.map(RiotAccountData.class));
+                .map(Mapping.map(RiotAccountData.class))
+                .map(data -> new RiotAccount(this, data));
     }
 
     //todo javadoc these and maybe address riot region vs other region
-    public Mono<RiotAccountData> getRiotAccountByPuuid(String puuid) {
+    public Mono<RiotAccount> getRiotAccountByPuuid(String puuid) {
         return getRiotAccountByPuuid("americas", puuid);
     }
-    public Mono<RiotAccountData> getRiotAccountByPuuid(String riotRegion, String puuid) {
+    public Mono<RiotAccount> getRiotAccountByPuuid(String riotRegion, String puuid) {
         return buckets.pushToBucket(RateLimits.ACCOUNT_BY_PUUID, getAccountByPuuidRaw(token, riotRegion, puuid))
-                .map(Mapping.map(RiotAccountData.class));
+                .map(Mapping.map(RiotAccountData.class))
+                .map(data -> new RiotAccount(this, data));
     }
 
     /**

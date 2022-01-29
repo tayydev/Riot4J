@@ -1,0 +1,39 @@
+package io.github.nathannorth.riot4j.api.match;
+
+import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
+import io.github.nathannorth.riot4j.enums.ValRegion;
+import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ValMatchlist {
+    private final RiotProductionAPIClient parent;
+    private final MatchlistData data;
+    private final ValRegion region;
+
+    public ValMatchlist(RiotProductionAPIClient parent, MatchlistData data, ValRegion region) {
+        this.parent = parent;
+        this.data = data;
+        this.region = region;
+    }
+
+    public String puuid() {
+        return data.puuid();
+    }
+
+    public List<MatchlistEntry> history() {
+        return data.history()
+                .stream()
+                .map(entry -> new MatchlistEntry(parent, entry, region))
+                .collect(Collectors.toList());
+    }
+
+    public MatchlistData getData() {
+        return data;
+    }
+
+    public ValRegion getRegion() {
+        return region;
+    }
+}

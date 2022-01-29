@@ -1,5 +1,9 @@
 package io.github.nathannorth.riot4j.clients;
 
+import io.github.nathannorth.riot4j.api.account.RiotAccount;
+import io.github.nathannorth.riot4j.api.match.MatchlistEntry;
+import io.github.nathannorth.riot4j.api.match.ValMatch;
+import io.github.nathannorth.riot4j.api.match.ValMatchlist;
 import io.github.nathannorth.riot4j.enums.ValRecentQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
@@ -7,7 +11,6 @@ import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
 import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
-import io.github.nathannorth.riot4j.objects.ValMatch;
 import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Mono;
 
@@ -31,9 +34,19 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
                 .map(matchData -> new ValMatch(matchData));
     }
 
-    public Mono<MatchlistData> getMatchList(ValRegion region, String puuid) {
+    public Mono<ValMatch> getMatch(MatchlistEntry entry) {
+        return getMatch(entry.region(), entry.matchId());
+    }
+
+    public Mono<ValMatchlist> getMatchList(ValRegion region, String puuid) {
         return buckets.pushToBucket(RateLimits.VAL_MATCHLIST, getMatchListRaw(token, region.toString(), puuid))
-                .map(Mapping.map(MatchlistData.class));
+                .map(Mapping.map(MatchlistData.class))
+                .map(data -> new ValMatchlist(this, data, region));
+    }
+
+    public Mono<ValMatchlist> getMatchList(RiotAccount account) {
+        return account.getRegion()
+                .flatMap(valRegion -> getMatchList(valRegion, account.puuid()));
     }
 
     public static class RiotProductionAPIClientBuilder {
