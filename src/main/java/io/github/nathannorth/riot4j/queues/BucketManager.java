@@ -27,8 +27,12 @@ public class BucketManager {
                 .flatMap(retryable -> useATry(retryable)
                                 //whenever a try makes it out of the method, we emit the result to the output mono and also tell the queue that it can start sending stuff again
                                 .doOnNext(e -> log.debug("Retryable completed in BucketManager"))
-                                .doOnNext(result -> retryable.getResultHandle().emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
-                                .doOnNext(result -> retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST))
+                                .flatMap(result ->
+                                        Mono.fromRunnable(() -> {
+                                            retryable.getResultHandle().emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST);
+                                            retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST);
+                                        })
+                                )
                                 //handle errors
                                 .onErrorResume(throwable -> {
                                     retryable.getResultHandle().emitError(throwable, Sinks.EmitFailureHandler.FAIL_FAST); //output error to client
