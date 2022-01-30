@@ -53,7 +53,7 @@ public class Bucket {
     Mono<String> push(HttpClient.ResponseReceiver<?> input) {
         log.debug("Bucket " + limit + " got input");
         Retryable r = new Retryable(input, limit);
-        in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
+        in.emitNext(r, FailureStrategy.RETRY_ON_SERIALIZED);
         return r.getResultHandle().asMono();
     }
 }

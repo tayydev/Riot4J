@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
@@ -29,13 +27,13 @@ public class BucketManager {
                 .flatMap(retryable -> useATry(retryable)
                                 //whenever a try makes it out of the method, we emit the result to the output mono and also tell the queue that it can start sending stuff again
                                 .doOnNext(e -> log.debug("Retryable completed in BucketManager"))
-                                .doOnNext(result -> retryable.getResultHandle().emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
-                                .doOnNext(result -> retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST))
+                                .doOnNext(result -> retryable.getResultHandle().emitValue(result, FailureStrategy.RETRY_ON_SERIALIZED))
+                                .doOnNext(result -> retryable.getBucketHandle().emitValue(true, FailureStrategy.RETRY_ON_SERIALIZED))
                                 //handle errors
                                 .onErrorResume(throwable -> {
                                     log.debug("Error passing through bucket " + throwable.toString());
-                                    retryable.getResultHandle().emitError(throwable, Sinks.EmitFailureHandler.FAIL_FAST); //output error to client
-                                    retryable.getBucketHandle().emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST); //an error is a success from the perspective of a bucket
+                                    retryable.getResultHandle().emitError(throwable, FailureStrategy.RETRY_ON_SERIALIZED); //output error to client
+                                    retryable.getBucketHandle().emitValue(true, FailureStrategy.RETRY_ON_SERIALIZED); //an error is a success from the perspective of a bucket
                                     return Mono.empty();
                                 })
                         , 1)
@@ -61,7 +59,7 @@ public class BucketManager {
                         //method rate limit
                         else {
                             log.info("BucketManager hit METHOD rate limit! Telling bucket to wait");
-                            retryable.getBucketHandle().emitError(rateLimitedError, Sinks.EmitFailureHandler.FAIL_FAST);
+                            retryable.getBucketHandle().emitError(rateLimitedError, FailureStrategy.RETRY_ON_SERIALIZED);
                             return Mono.empty(); //go on with our lives
                         }
                     }
@@ -73,18 +71,9 @@ public class BucketManager {
     //when a bucket pushes to the manager we need to reset the handle it waits on, and then emit to our queue
     protected Mono<Boolean> push(Retryable r) {
         r.setBucketHandle(Sinks.one()); //reset bucket handle
-        in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
+        in.emitNext(r, FailureStrategy.RETRY_ON_SERIALIZED);
         return r.getBucketHandle().asMono();
     }
-
-    /**
-     * i have no clue what im doing but i think that having a single very boring scheduler means that random bucket
-     * actions don't get different threads. I want to avoid this because sinks don't like to recieve input from multiple places
-     * but they're kind of a tsundere about it because sometimes they are ok with it and if you define a custom emit strategy
-     * they might just be chilling but everyone talking about custom emit strategies is all like 'well if everyone behaves this will work'
-     * and im like bro how do i know if my code is going to behave its a bunch of letters not a dog
-     */
-    private final Scheduler scheduler = Schedulers.newSingle("Buckets");
 
     //public method to access teh manager. Allows a user to push to a bucket given a key enum. Creates buckets as necessary.
     public Mono<String> pushToBucket(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
@@ -94,6 +83,6 @@ public class BucketManager {
                     key -> new Bucket(this, key)
             );
             return bucket.push(input);
-        }).subscribeOn(scheduler);
+        });
     }
 }
