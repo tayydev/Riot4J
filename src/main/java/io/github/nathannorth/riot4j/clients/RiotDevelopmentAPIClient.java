@@ -19,6 +19,8 @@ import io.github.nathannorth.riot4j.objects.ValActIdGroup;
 import io.github.nathannorth.riot4j.objects.ValStatusUpdateEvent;
 import io.github.nathannorth.riot4j.queues.BucketManager;
 import io.github.nathannorth.riot4j.queues.RateLimits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,6 +33,8 @@ import java.util.ArrayList;
  * more complete access to the API would be written.
  */
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
+
+    private static final Logger log = LoggerFactory.getLogger(RiotDevelopmentAPIClient.class);
 
     protected final BucketManager buckets = new BucketManager();
 
@@ -110,7 +114,9 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return
      */
     public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) { //todo test or remove this
-        return Flux.interval(duration).flatMap(num -> getValStatus(region)
+        return Flux.interval(duration)
+                .doOnNext(e -> log.debug("Trying to get a new status update"))
+                .flatMap(num -> getValStatus(region)
                 .filter(status -> !status.equals(lastData)) //data must be changed
                 .map(newStatus -> {
                     PlatformStatusData oldStatus = lastData;
