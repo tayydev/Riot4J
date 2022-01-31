@@ -113,17 +113,19 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param duration Duration to check for updates, not recommended to be set to anything under 1 second to avoid overflowing the ratelimit sink
      * @return
      */
-    public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) { //todo test or remove this
+    public Flux<ValStatusUpdateEvent> getStatusUpdates(ValRegion region, Duration duration) {
         return Flux.interval(duration)
                 .doOnNext(e -> log.debug("Trying to get a new status update"))
-                .flatMap(num -> getValStatus(region))
-                .onErrorResume(WebFailure.class, fail -> {
-                    if(fail.getResponse().status().code() / 100 == 5) { //500 errors are not my problem
-                        log.warn("Got a " + fail.getResponse().status().code() + " error from status API. Ignoring...");
-                        return Mono.empty();
-                    }
-                    return Mono.error(fail); //anything else is though
-                })
+                .flatMap(num ->
+                        getValStatus(region)
+                                .onErrorResume(WebFailure.class, fail -> { //todo instead of nested onerror systems we should have a proper retry strategy
+                                    if(fail.getResponse().status().code() / 100 == 5) { //500 errors are not my problem
+                                        log.warn("Got a " + fail.getResponse().status().code() + " error from status API. Ignoring...");
+                                        return Mono.just(lastData);
+                                    }
+                                    return Mono.error(fail); //anything else is though
+                                })
+                )
                 .filter(status -> !status.equals(lastData)) //data must be changed
                 .map(newStatus -> {
                     PlatformStatusData oldStatus = lastData;
