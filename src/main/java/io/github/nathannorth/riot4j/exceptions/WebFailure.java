@@ -26,4 +26,14 @@ public class WebFailure extends RuntimeException {
                 ", content='" + content + '\'' +
                 "} " + super.toString();
     }
+
+    public static WebFailure of(HttpClientResponse response, String content) {
+        if(response.status().code() == 429) {
+            return new RateLimitedException(response, content);
+        }
+        if(response.status().code() / 100 == 5) {
+            return new RetryableException(response, content);
+        }
+        return new WebFailure(response, content);
+    }
 }

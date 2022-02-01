@@ -1,6 +1,7 @@
 package io.github.nathannorth.riot4j.queues;
 
 import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
+import io.github.nathannorth.riot4j.exceptions.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -41,11 +42,20 @@ public class Bucket {
     // queue emits error then we wait and re-push to master
     private Mono<Boolean> useATry(Retryable retryable) {
         return master.push(retryable)
-                .onErrorResume(e -> {
-                    RateLimitedException rateLimitedException = (RateLimitedException) e; //we will only ever get this specific exception out of this sink, hence unchecked cast
-                    log.warn("Bucket " + limit.name() + " got METHOD rate limit from master! Delaying " + rateLimitedException.getSecs() + " seconds");
-                    return Mono.delay(Duration.ofSeconds(rateLimitedException.getSecs()))
-                            .flatMap(finished -> useATry(retryable));
+                .onErrorResume(RateLimitedException.class, error -> {
+                    log.warn("Bucket " + limit.name() + " got METHOD rate limit from master! Delaying " + error.getSecs() + " seconds");
+                    return Mono.delay(Duration.ofSeconds(error.getSecs()))
+                            .flatMap(completion -> useATry(retryable));
+                })
+                .onErrorResume(RetryableException.class, error -> {
+                    int time = retryable.makeRetry();
+                    if(time == -1) {
+                        log.error("Retried MAX amount " + retryable.getRetryCount() + " of times for " + limit.name() + ". Dropping...");
+                        return Mono.empty();
+                    }
+                    log.warn("Bucket " + limit.name() + " got a retryable error! Delaying " + time + " seconds. This is attempt " + retryable.getRetryCount() +  " for this request");
+                    return Mono.delay(Duration.ofSeconds(time))
+                            .flatMap(completion -> useATry(retryable));
                 });
     }
 
@@ -53,7 +63,7 @@ public class Bucket {
     Mono<String> push(HttpClient.ResponseReceiver<?> input) {
         log.debug("Bucket " + limit + " got input");
         Retryable r = new Retryable(input, limit);
-        in.emitNext(r, FailureStrategy.RETRY_ON_SERIALIZED);
+        in.emitNext(r, FailureStrategies.RETRY_ON_SERIALIZED);
         return r.getResultHandle().asMono();
     }
 }

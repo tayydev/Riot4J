@@ -1,7 +1,7 @@
 package io.github.nathannorth.riot4j.queues;
 
-import io.github.nathannorth.riot4j.exceptions.Exceptions;
 import io.github.nathannorth.riot4j.exceptions.RateLimitedException;
+import io.github.nathannorth.riot4j.exceptions.WebFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -11,7 +11,7 @@ import reactor.netty.http.client.HttpClientResponse;
 
 import java.time.Duration;
 
-public class LegacyQueue {
+public class LegacyQueue { //todo depreciate so we can have retries in rso client
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
     private Logger log = LoggerFactory.getLogger(LegacyQueue.class);
@@ -57,7 +57,7 @@ public class LegacyQueue {
         //yes errors
         return contentMono
                 .switchIfEmpty(Mono.just("")) //make sure we don't eat errors w/out body
-                .flatMap(content -> Mono.error(Exceptions.ofWebFailure(response, content)));
+                .flatMap(content -> Mono.error(WebFailure.of(response, content)));
     }
 
     public static class Request {

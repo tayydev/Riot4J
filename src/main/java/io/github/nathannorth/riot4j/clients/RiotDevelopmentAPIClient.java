@@ -117,13 +117,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         return Flux.interval(duration)
                 .doOnNext(e -> log.debug("Trying to get a new status update"))
                 .flatMap(num -> getValStatus(region))
-                .onErrorResume(WebFailure.class, fail -> {
-                    if(fail.getResponse().status().code() / 100 == 5) { //500 errors are not my problem
-                        log.warn("Got a " + fail.getResponse().status().code() + " error from status API. Ignoring...");
-                        return Mono.empty();
-                    }
-                    return Mono.error(fail); //anything else is though
-                })
+                .doOnNext(e -> log.debug("Succeeded in getting new status update"))
                 .filter(status -> !status.equals(lastData)) //data must be changed
                 .map(newStatus -> {
                     PlatformStatusData oldStatus = lastData;
