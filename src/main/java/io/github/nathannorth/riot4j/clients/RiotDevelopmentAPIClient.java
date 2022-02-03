@@ -1,14 +1,13 @@
 package io.github.nathannorth.riot4j.clients;
 
 import io.github.nathannorth.riot4j.api.account.RiotAccount;
+import io.github.nathannorth.riot4j.enums.RiotGame;
+import io.github.nathannorth.riot4j.enums.RiotRegion;
 import io.github.nathannorth.riot4j.enums.ValLocale;
 import io.github.nathannorth.riot4j.enums.ValRegion;
-import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
-import io.github.nathannorth.riot4j.exceptions.InvalidTokenException;
 import io.github.nathannorth.riot4j.exceptions.WebFailure;
 import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
-import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
 import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardPlayerData;
@@ -17,7 +16,6 @@ import io.github.nathannorth.riot4j.objects.Translator;
 import io.github.nathannorth.riot4j.objects.ValActId;
 import io.github.nathannorth.riot4j.objects.ValActIdGroup;
 import io.github.nathannorth.riot4j.objects.ValStatusUpdateEvent;
-import io.github.nathannorth.riot4j.queues.BucketManager;
 import io.github.nathannorth.riot4j.queues.RateLimits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,39 +34,13 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
     private static final Logger log = LoggerFactory.getLogger(RiotDevelopmentAPIClient.class);
 
-    protected final BucketManager buckets = new BucketManager();
-
-    protected RiotDevelopmentAPIClient(String token) {
-        super(token);
-    }
-
-
-    /**
-     * Initialize a new builder.
-     * @return A builder object
-     */
-    public static RiotDevelopmentAPIClientBuilder getDevBuilder() {
-        return new RiotDevelopmentAPIClientBuilder();
-    }
-
-    public Mono<ActiveShardData> getActiveShardsVal(String puuid) {
-        return getActiveShardsByGame("americas", "val", puuid);
-    }
-
-    public Mono<ActiveShardData> getActiveShardsByGame(String riotRegion, String game, String puuid) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_ACTIVE_SHARD_BY_GAME, getActiveShardsByGameRaw(token, riotRegion, game, puuid))
-                .map(Mapping.map(ActiveShardData.class));
+    protected RiotDevelopmentAPIClient(ClientConfig config) {
+        super(config);
     }
 
     /**
-     *
-     * @param name
-     * @param tagLine
-     * @return
+     * ACCOUNTS:
      */
-    public Mono<RiotAccount> getRiotAccountByName(String name, String tagLine) {
-        return getRiotAccountByName("americas", name, tagLine);
-    }
 
     /**
      * Gets a riot account from a name/tagline. note the parameter is a RIOT REGION, not a VAL REGION. There is no enum
@@ -79,21 +51,42 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param tagLine tag to search for
      * @return returns a {@link WebFailure} with error code 404 if user not found
      */
-    public Mono<RiotAccount> getRiotAccountByName(String riotRegion, String name, String tagLine) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, riotRegion, name, tagLine))
-                .map(Mapping.map(RiotAccountData.class))
+    public Mono<RiotAccount> getRiotAccountByName(RiotRegion riotRegion, String name, String tagLine) {
+        return getRiotAccountData(riotRegion, name, tagLine)
                 .map(data -> new RiotAccount(this, data));
     }
 
-    //todo javadoc these and maybe address riot region vs other region
-    public Mono<RiotAccount> getRiotAccountByPuuid(String puuid) {
-        return getRiotAccountByPuuid("americas", puuid);
+    public Mono<RiotAccount> getRiotAccountByName(String name, String tagLine) {
+        return getRiotAccountByName(riotRegion, name, tagLine);
     }
-    public Mono<RiotAccount> getRiotAccountByPuuid(String riotRegion, String puuid) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_PUUID, getAccountByPuuidRaw(token, riotRegion, puuid))
-                .map(Mapping.map(RiotAccountData.class))
+
+
+    public Mono<RiotAccount> getRiotAccountByPuuid(RiotRegion riotRegion, String puuid) {
+        return getRiotAccountData(riotRegion, puuid)
                 .map(data -> new RiotAccount(this, data));
     }
+
+    public Mono<RiotAccount> getRiotAccountByPuuid(String puuid) {
+        return getRiotAccountByPuuid(riotRegion, puuid);
+    }
+
+    /**
+     * REGIONS:
+     */
+
+    public Mono<ActiveShardData> getActiveShardsByGame(RiotRegion region, RiotGame game, String puuid) {
+        return getActiveShardData(region, game, puuid);
+    }
+
+    public Mono<ActiveShardData> getActiveShardsVal(String puuid) {
+        return getActiveShardsByGame(riotRegion, RiotGame.VALORANT, puuid);
+    }
+
+    /**
+     * STATUS:
+     */
+
+    //todo abstract more data methods to RiotAPIClient
 
     /**
      * Gets VALORANT's status for a given region.
@@ -142,7 +135,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a mono that evaluates to a ValActIdSet
      */
     public Mono<ValActIdGroup> getActs() {
-        return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
+        return getValContent(valRegion, ValLocale.US_ENGLISH)
                 .map(contentData -> new ValActIdGroup(contentData.acts()));
     }
 
@@ -151,7 +144,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @return a translator object up do date as of when the mono evaluates
      */
     public Mono<Translator> getTranslator() {
-        return getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH)
+        return getValContent(valRegion, ValLocale.US_ENGLISH)
                 .map(contentData -> new Translator(contentData));
     }
 
@@ -195,44 +188,8 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
                                 .flatMapMany(result -> Flux.fromIterable(result.players())), 1);
     }
 
-    public static class RiotDevelopmentAPIClientBuilder {
-        private String key = null;
-
-        /**
-         * Gives a builder object an API key
-         * @param key your API key
-         * @return your builder with an updated API key
-         */
-        public RiotDevelopmentAPIClientBuilder addKey(String key) {
-                this.key = key;
-                return this;
-            }
-
-        /**
-         * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
-         * @return a RiotDevelopmentAPIClient
-         */
-        public Mono<RiotDevelopmentAPIClient> build() {
-                if (key == null) return Mono.error(new IncompleteBuilderException("Did not specify token."));
-                RiotDevelopmentAPIClient temp = new RiotDevelopmentAPIClient(key);
-                return temp.getValStatus(ValRegion.NORTH_AMERICA)
-                        .onErrorResume(e -> {
-                            if (e instanceof WebFailure) {
-                                if(((WebFailure) e).getResponse().status().code() == 403)
-                                    return Mono.error(new InvalidTokenException("The token specified is not valid."));
-                            }
-                            return Mono.error(e);
-                        })
-                        .then(Mono.just(temp));
-        }
-
-        /**
-         * if you like to live life on the edge (or want to save resources) this method is for you
-         * @return a RiotDevelopmentAPIClient WITHOUT testing its API key.
-         */
-        public RiotDevelopmentAPIClient buildUnsafe() {
-            if (key == null) throw new IncompleteBuilderException("Did not specify token.");
-            return new RiotDevelopmentAPIClient(key);
-        }
+    @Override
+    public Mono<RiotAPIClient> test() {
+        return this.getValStatus(valRegion).thenReturn(this);
     }
 }

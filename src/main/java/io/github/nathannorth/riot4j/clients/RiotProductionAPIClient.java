@@ -6,7 +6,6 @@ import io.github.nathannorth.riot4j.api.match.ValMatch;
 import io.github.nathannorth.riot4j.api.match.ValMatchlist;
 import io.github.nathannorth.riot4j.enums.ValRecentQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
-import io.github.nathannorth.riot4j.exceptions.IncompleteBuilderException;
 import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.valMatch.MatchData;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
@@ -15,12 +14,8 @@ import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Mono;
 
 public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
-    protected RiotProductionAPIClient(String token) {
-        super(token);
-    }
-
-    public static RiotProductionAPIClientBuilder getProdBuilder() {
-        return new RiotProductionAPIClientBuilder();
+    protected RiotProductionAPIClient(ClientConfig config) {
+        super(config);
     }
 
     public Mono<RecentMatchesData> getRecentMatches(ValRegion region, ValRecentQueue queue) {
@@ -49,28 +44,9 @@ public class RiotProductionAPIClient extends RiotDevelopmentAPIClient {
                 .flatMap(valRegion -> getMatchList(valRegion, account.puuid()));
     }
 
-    public static class RiotProductionAPIClientBuilder {
-        private String key = null;
-
-        /**
-         * Gives a builder object an API key
-         * @param key your API key
-         * @return your builder with an updated API key
-         */
-        public RiotProductionAPIClientBuilder addKey(String key) {
-            this.key = key;
-            return this;
-        }
-
-        /**
-         * Returns a mono of your client that when evaluated tests your api key and returns a completed RiotDevelopmentAPIClient
-         * @return a RiotDevelopmentAPIClient
-         */
-        public Mono<RiotProductionAPIClient> build() {
-            if (key == null) return Mono.error(new IncompleteBuilderException("Did not specify token."));
-            RiotProductionAPIClient temp = new RiotProductionAPIClient(key);
-            return temp.getRecentMatches(ValRegion.NORTH_AMERICA, ValRecentQueue.UNRATED)
-                    .then(Mono.just(temp));
-        }
+    @Override
+    public Mono<RiotAPIClient> test() {
+        return getRecentMatches(valRegion, ValRecentQueue.UNRATED)
+                .thenReturn(this);
     }
 }

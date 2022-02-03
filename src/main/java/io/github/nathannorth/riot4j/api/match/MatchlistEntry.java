@@ -25,7 +25,7 @@ public class MatchlistEntry {
     }
 
     public Mono<ValMatch> getValMatch() {
-        return parent.getMatch(region(), matchId());
+        return parent.getMatch(this);
     }
 
     public String matchId() {

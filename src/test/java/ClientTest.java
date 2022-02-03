@@ -1,6 +1,7 @@
 import io.github.nathannorth.riot4j.api.account.RiotAccount;
 import io.github.nathannorth.riot4j.api.match.ValMatch;
 import io.github.nathannorth.riot4j.api.match.ValMatchlist;
+import io.github.nathannorth.riot4j.clients.RiotClientBuilder;
 import io.github.nathannorth.riot4j.clients.RiotDevelopmentAPIClient;
 import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
 import io.github.nathannorth.riot4j.enums.ValLocale;
@@ -10,6 +11,7 @@ import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
 import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
+import io.github.nathannorth.riot4j.json.valPlatform.PlatformStatusData;
 import io.github.nathannorth.riot4j.objects.ValActId;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -23,13 +25,15 @@ import java.util.List;
 public class ClientTest {
     @Test
     public void testDevClient() {
-        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.getDevBuilder()
-                .addKey(getKeys().get(0))
-                .build()
+        final RiotDevelopmentAPIClient client = RiotClientBuilder.create()
+                .token(getKeys().get(0))
+                .buildDevClient()
                 .block();
         assert client != null;
 
         client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(1)).blockFirst();
+
+        PlatformStatusData data = client.getValStatus(ValRegion.NORTH_AMERICA).block();
 
         ContentData content = client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
 
@@ -40,9 +44,10 @@ public class ClientTest {
 
     @Test
     public void testProductionClient() {
-        final RiotProductionAPIClient client = RiotProductionAPIClient.getProdBuilder()
-                .addKey(getKeys().get(1))
-                .build()
+        final RiotProductionAPIClient client = RiotClientBuilder.create()
+                .token(getKeys().get(1))
+                .valRegion(ValRegion.BRAZIL)
+                .buildProductionClient()
                 .block();
         assert client != null;
 
@@ -56,16 +61,16 @@ public class ClientTest {
 
         ValMatch match = client.getMatch(loc.activeShard(), matchList.history().get(0).matchId()).block();
 
-        ValMatch dm = client.getMatch(loc.activeShard(), Flux.fromIterable(matchList.history()).filter(e -> e.queueId().equals(ValQueueId.DEATHMATCH)).map(e -> e.matchId()).next().block()).block();
+        ValMatch dm = client.getMatch(loc.activeShard(), matchList.matches().filter(e -> e.queueId().equals(ValQueueId.DEATHMATCH)).map(e -> e.matchId()).next().block()).block();
 
         client.getRecentMatches(ValRegion.NORTH_AMERICA, ValRecentQueue.COMPETITIVE).block();
     }
 
     @Test
     public void cacheTest() {
-        final RiotProductionAPIClient client = RiotProductionAPIClient.getProdBuilder()
-                .addKey(getKeys().get(1))
-                .build()
+        final RiotProductionAPIClient client = RiotClientBuilder.create()
+                .token(getKeys().get(1))
+                .buildProductionClient()
                 .block();
         assert client != null;
 
@@ -92,9 +97,9 @@ public class ClientTest {
 
     @Test
     public void speedTest() {
-        final RiotDevelopmentAPIClient client = RiotDevelopmentAPIClient.getDevBuilder()
-                .addKey(getKeys().get(0))
-                .build()
+        final RiotDevelopmentAPIClient client = RiotClientBuilder.create()
+                .token(getKeys().get(0))
+                .buildDevClient()
                 .block();
         assert client != null;
 

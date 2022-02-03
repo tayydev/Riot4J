@@ -3,6 +3,7 @@ package io.github.nathannorth.riot4j.api.match;
 import io.github.nathannorth.riot4j.clients.RiotProductionAPIClient;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.valMatch.MatchlistData;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,10 @@ public class ValMatchlist {
 
     public List<MatchlistEntry> history() {
         return history;
+    }
+
+    public Flux<MatchlistEntry> matches() {
+        return Flux.fromIterable(history);
     }
 
     public MatchlistData getData() {
