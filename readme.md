@@ -37,12 +37,13 @@ public class Example2 {
                 .buildDevClient()
                 .block();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
-                .map(player -> 
-                        "Rank: #" + player.leaderboardRank() + 
-                        " - Name: " + player.gameName().orElse("Anonymous")
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0)
+                .take(2000)
+                .map(player ->
+                        "Rank: #" + player.leaderboardRank() +
+                                " - Name: " + player.gameName().orElse("Anonymous")
                 )
-                .doOnNext(info -> System.out.println(info))
+                .doOnNext(System.out::println)
                 .blockLast();
     }
 }
