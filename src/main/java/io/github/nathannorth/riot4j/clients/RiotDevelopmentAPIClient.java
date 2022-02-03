@@ -162,11 +162,15 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start) {
+        return getValLeaderboards(region, act, start, Long.MAX_VALUE);
+    }
+
+    public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start, long cap) {
         if(start < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         //there is technically the possibility of the leaderboards shrinking while you process chunks causing you to hit an invalid index.
         return getLeaderboardData(region, act, 0L, 1L).flatMapMany(it ->
-                    recurValLeaderboards(region, act, start, it.totalPlayers())
-                );
+                recurValLeaderboards(region, act, start, Math.min(it.totalPlayers(), cap))
+        );
     }
 
     private Flux<LeaderboardPlayerData> recurValLeaderboards(ValRegion region, ValActId act, long start, long cap) {
