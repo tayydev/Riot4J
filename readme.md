@@ -50,8 +50,8 @@ public class Example2 {
 # Features
 - **Reactive** - Riot4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol
 - **Automatic Rate Limiting** - Riot4J automatically handles rate limiting *per bucket* so you shouldn't have to worry about those pesky 429 errors
-- **Exponential Backoff** - Riot4J automatically retries when Riot's api is returning 500s 
-- **Convenience Methods** - Riot4J extends and connects objects in intuitive, useful ways
+- **Exponential Backoff** - Riot4J automatically retries when Riot's API is returning 500s 
+- **Convenience Methods** - Riot4J extends and connects raw data mappings in intuitive, useful ways
 # Build
 The only current supported method of implementing Riot4J is through Gradle's [composite builds](https://docs.gradle.org/current/userguide/composite_builds.html). Riot4J is still receiving breaking API changes regularly, and should be used for experimentation only. Please get in touch if you are interested in using this in a more official capacity.
 # Disclaimer
