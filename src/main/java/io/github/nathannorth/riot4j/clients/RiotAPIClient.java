@@ -6,6 +6,8 @@ import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.Mapping;
 import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.riotAccount.RiotAccountData;
+import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
+import io.github.nathannorth.riot4j.objects.ValActId;
 import io.github.nathannorth.riot4j.queues.BucketManager;
 import io.github.nathannorth.riot4j.queues.RateLimits;
 import reactor.core.publisher.Mono;
@@ -38,6 +40,11 @@ public abstract class RiotAPIClient extends RawAPIInterface {
     protected Mono<ActiveShardData> getActiveShardData(RiotRegion region, RiotGame game, String puuid) {
         return buckets.pushToBucket(RateLimits.ACTIVE_SHARDS, getActiveShardsByGameRaw(token, region.toString(), game.toString(), puuid))
                 .map(Mapping.map(ActiveShardData.class));
+    }
+
+    protected Mono<LeaderboardData> getLeaderboardData(ValRegion region, ValActId act, Long start, Long size) {
+        return buckets.pushToBucket(RateLimits.VAL_RANKED, getValLeaderboardRaw(token, region.toString(), act.toString(), size.toString(), start.toString()))
+                .map(Mapping.map(LeaderboardData.class));
     }
 
     public abstract Mono<RiotAPIClient> test();

@@ -10,6 +10,7 @@ import io.github.nathannorth.riot4j.enums.ValRecentQueue;
 import io.github.nathannorth.riot4j.enums.ValRegion;
 import io.github.nathannorth.riot4j.json.riotAccount.ActiveShardData;
 import io.github.nathannorth.riot4j.json.valContent.ContentData;
+import io.github.nathannorth.riot4j.json.valLeaderboard.LeaderboardData;
 import io.github.nathannorth.riot4j.json.valMatch.RecentMatchesData;
 import io.github.nathannorth.riot4j.json.valPlatform.PlatformStatusData;
 import io.github.nathannorth.riot4j.objects.ValActId;
@@ -31,6 +32,13 @@ public class ClientTest {
                 .block();
         assert client != null;
 
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 12370)
+                .take(600)
+                .doOnNext(e -> System.out.println(e))
+                .blockLast();
+
+        LeaderboardData leaderboard = client.getValLeaderboardChunk(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 100, 100).block();
+
         client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(1)).blockFirst();
 
         PlatformStatusData data = client.getValStatus(ValRegion.NORTH_AMERICA).block();
@@ -38,7 +46,8 @@ public class ClientTest {
         ContentData content = client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
 
         client.getActs().map(acts -> acts.getActId(3, 1)).flatMapMany(actId ->
-                client.getValLeaderboards(ValRegion.NORTH_AMERICA, actId, 0, 1000))
+                client.getValLeaderboards(ValRegion.NORTH_AMERICA, actId, 0))
+                .take(1000)
                 .blockLast();
     }
 
@@ -110,7 +119,8 @@ public class ClientTest {
                 .doOnNext(e -> System.out.println("This message should play at regular 5 second intervals, regardless of rate limiting for the ranked endpoint..."))
                 .subscribe();
 
-        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0, 2000)
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 0)
+                .take(2000)
                 .blockLast();
     }
 

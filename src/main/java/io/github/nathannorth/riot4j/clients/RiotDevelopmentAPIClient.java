@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 
 /**
  * A DevelopmentClient is the core of this library. The client contains logic for rate limiting and mapping requests.
@@ -158,34 +157,28 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      */
     public Mono<LeaderboardData> getValLeaderboardChunk(ValRegion region, ValActId actId, long startIndex, long size) {
         if(startIndex < 0) return Mono.error(new IndexOutOfBoundsException("Start cannot be negative!"));
-        if(size > 200) return Mono.error(new IndexOutOfBoundsException("Size cannot be greater than 200!"));
-        //todo more robust checks
-        return buckets.pushToBucket(RateLimits.VAL_RANKED, getValLeaderboardRaw(token, region.toString(), actId.toString(), size + "", startIndex + ""))
-                .map(Mapping.map(LeaderboardData.class));
+        if(size > 200) return Mono.error(new IndexOutOfBoundsException("Size cannot be greater than 200"));
+        return getLeaderboardData(region, actId, startIndex, size);
     }
 
-    /**
-     * Returns a flux of players in between two positions on the leaderboard. See also: {@link #getValLeaderboardChunk(ValRegion, ValActId, long, long)} if you need to get additional data besides just player objects (eg total players).
-     * @param region Which VALORANT region to get data from
-     * @param id Which act to get data from - will 404 from any act before Episode Two
-     * @param startIndex Index for the start of the range you want data from (inclusive)
-     * @param endIndex Index of the end of the range you want data from (noninclusive)
-     * @return a flux of player objects from startIndex to endIndex
-     */
-    public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId id, long startIndex, long endIndex) {
-        if(startIndex < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
-        if(startIndex >= endIndex) return Flux.error(new IndexOutOfBoundsException("Invalid range!"));
-        return getValLeaderboardChunk(region, id, 0, 1)
-                .flatMapMany(data -> {
-                    ArrayList<Long> temp = new ArrayList<>();
-                    for(long i = startIndex; i < Math.min(endIndex, data.totalPlayers() - 1); i += 200) {
-                        temp.add(i);
-                    }
-                    if(temp.size() == 0) return Flux.error(new IndexOutOfBoundsException("Outside of leaderboard range!"));
-                    return Flux.fromIterable(temp);
-                })
-                        .flatMap(num -> getValLeaderboardChunk(region, id, num, Math.min(endIndex - num, 200))
-                                .flatMapMany(result -> Flux.fromIterable(result.players())), 1);
+    public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start) {
+        if(start < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
+        //there is technically the possibility of the leaderboards shrinking while you process chunks causing you to hit an invalid index.
+        return getLeaderboardData(region, act, 0L, 1L).flatMapMany(it ->
+                    recurValLeaderboards(region, act, start, it.totalPlayers())
+                );
+    }
+
+    private Flux<LeaderboardPlayerData> recurValLeaderboards(ValRegion region, ValActId act, long start, long cap) {
+        long size = 200;
+        if(start + 200 >= cap) { //if we are getting players at the very end of the leaderboards
+            size = cap - start;
+        }
+        if(size <= 0) return Flux.empty();
+        return Flux.concat(
+                getLeaderboardData(region, act, start, size).flatMapMany(it -> Flux.fromIterable(it.players())),
+                Flux.defer(() -> recurValLeaderboards(region, act, start + 200, cap))
+        );
     }
 
     @Override
