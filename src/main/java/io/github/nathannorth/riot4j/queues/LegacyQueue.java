@@ -26,9 +26,11 @@ public class LegacyQueue { //todo depreciate so we can have retries in rso clien
 
     //push new item to the queue
     public Mono<String> push(HttpClient.ResponseReceiver<?> input) {
-        Request r = new Request(input);
-        in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
-        return r.response.asMono();
+        return Mono.defer(() -> {
+                    Request r = new Request(input);
+                    in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
+                    return r.response.asMono();
+                });
     }
 
     //processes a request. May create/handle errors
