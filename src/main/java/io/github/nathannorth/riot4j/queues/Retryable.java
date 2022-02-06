@@ -1,13 +1,19 @@
 package io.github.nathannorth.riot4j.queues;
 
+import io.github.nathannorth.riot4j.exceptions.RetryableException;
 import io.github.nathannorth.riot4j.exceptions.WebFailure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.PrematureCloseException;
 
 import java.nio.charset.StandardCharsets;
 
 public class Retryable {
+
+    private static final Logger log = LoggerFactory.getLogger(Retryable.class);
 
     private final HttpClient.ResponseReceiver<?> httpRequest;
     private final Sinks.One<String> resultHandle = Sinks.one();
@@ -59,6 +65,9 @@ public class Retryable {
                     .flatMap(content -> { //save body of the error
                         return Mono.error(WebFailure.of(response, content));
                     });
-        }));
+        })).onErrorResume(PrematureCloseException.class, closure -> {
+            log.warn("Converting PrematureCloseException " + closure.getMessage() + " to empty RetryableException");
+            return Mono.error(new RetryableException()); //sketchy but probably fine (see retryableException)
+        });
     }
 }

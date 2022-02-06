@@ -27,7 +27,7 @@ public class WebFailure extends RuntimeException {
                 "} " + super.toString();
     }
 
-    public static WebFailure of(HttpClientResponse response, String content) {
+    public static RuntimeException of(HttpClientResponse response, String content) {
         if(response.status().code() == 429) {
             return new RateLimitedException(response, content);
         }
