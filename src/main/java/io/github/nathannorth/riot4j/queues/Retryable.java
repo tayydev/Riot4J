@@ -2,6 +2,7 @@ package io.github.nathannorth.riot4j.queues;
 
 import io.github.nathannorth.riot4j.exceptions.RetryableException;
 import io.github.nathannorth.riot4j.exceptions.WebFailure;
+import io.netty.channel.ConnectTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -65,9 +66,12 @@ public class Retryable {
                     .flatMap(content -> { //save body of the error
                         return Mono.error(WebFailure.of(response, content));
                     });
-        })).onErrorResume(PrematureCloseException.class, closure -> {
-            log.warn("Converting PrematureCloseException " + closure.getMessage() + " to empty RetryableException");
-            return Mono.error(new RetryableException()); //sketchy but probably fine (see retryableException)
+        })).onErrorResume(error -> {
+            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException) {
+                log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
+                return Mono.error(new RetryableException()); //sketchy but probably fine (see retryableException)
+            }
+            return Mono.error(error); //todo better handle for unknown errors
         });
     }
 }
