@@ -47,5 +47,7 @@ public abstract class RiotAPIClient extends RawAPIInterface {
                 .map(Mapping.map(LeaderboardData.class));
     }
 
+    //todo still missing some methods that are only in riotdev/prod clients
+
     public abstract Mono<RiotAPIClient> test();
 }

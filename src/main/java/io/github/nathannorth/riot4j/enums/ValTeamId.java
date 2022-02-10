@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ValTeamId {
     BLUE("Blue") ,
     RED("Red"),
-    TIE("Tie"), //todo added for my convenience, think more about this
     @JsonEnumDefaultValue
     DEATHMATCH("Deathmatch");
 
