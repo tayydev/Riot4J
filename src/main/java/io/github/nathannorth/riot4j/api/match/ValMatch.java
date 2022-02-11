@@ -120,6 +120,7 @@ public class ValMatch implements Comparable<ValMatch> {
         return returnable;
     }
 
+    //todo maybe make optional and remove public access to the playerData object? maybe make a coach object and have this return either or?
     public StatisticalValPlayer getStatisticalPlayer(String puuid) {
         PlayerData player = getPlayer(puuid);
 
@@ -132,7 +133,7 @@ public class ValMatch implements Comparable<ValMatch> {
          */
         int headShots = 0;
         int totalShots = 0;
-        for(RoundResultData round: roundResults()) {
+        for(RoundResultData round: roundResults()) { //todo this loop should be in statisticalValPlayer
             PlayerRoundStatsData stats = getPlayerRound(round, puuid);
             for(DamageData fight: stats.damage()) {
                 headShots += fight.headshots();
@@ -151,7 +152,7 @@ public class ValMatch implements Comparable<ValMatch> {
     }
 
     //returns a ValQueueId that represents what GAME MODE is being played eg. if it's a custom deathmatch then it returns deathmatch *instead* of custom
-    public ValQueueId gameModeAsQueue() {
+    public ValQueueId gameModeAsQueue() { //todo gamemode should be an object also double check this can't be handled api side
         String mode = matchInfo().gameMode();
         if(mode.equals("/Game/GameModes/Bomb/BombGameMode.BombGameMode_C")) return ValQueueId.UNRATED;
         if(mode.equals("/Game/GameModes/Deathmatch/DeathmatchGameMode.DeathmatchGameMode_C")) return ValQueueId.DEATHMATCH;
@@ -165,10 +166,10 @@ public class ValMatch implements Comparable<ValMatch> {
     //for use in conjunction with Translator#gameModeAsQueue
     public String scoreLine(PlayerData playerData) {
         //funny deathmatch scoreline based on kills
-        if(gameModeAsQueue().equals(ValQueueId.DEATHMATCH)) {
+        if(gameModeAsQueue().equals(ValQueueId.DEATHMATCH)) { //todo this might crash with custom deathmatches with 1 player
             //get list of players sorted by kills
             List<PlayerData> players = new ArrayList<>(players()); //arraylist so modifiable
-            players.sort((a, b) -> {
+            players.sort((a, b) -> { //todo players should implement comparable (by kills and/or by combat score), could also help with matchmvp methods
                 if(a.stats().get().kills() > b.stats().get().kills()) {
                     return -1;
                 }
@@ -181,7 +182,8 @@ public class ValMatch implements Comparable<ValMatch> {
             if(players.get(0).puuid().equals(playerData.puuid())) {
                 return playerData.stats().get().kills() + ":" + players.get(1).stats().get().kills();
             }
-            else { //if you lose the deathmatch [winnerScore]:[yourScore]
+            //if you lose the deathmatch [winnerScore]:[yourScore]
+            else {
                 return playerData.stats().get().kills() + ":" + players.get(0).stats().get().kills();
             }
         }

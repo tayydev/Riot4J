@@ -72,7 +72,7 @@ public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalV
     }
 
     @Override
-    public Optional<String> characterId() {
+    public Optional<String> characterId() { //todo character id should be a Character object (linked to translator)
         return data.characterId();
     }
 
