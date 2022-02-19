@@ -35,7 +35,7 @@ public class ValContent {
 
     private final Map<String, ValCharacter> characters = new HashMap<>();
     public ValCharacter characterOf(String id) {
-        return characters.get(id);
+        return characters.get(id.toUpperCase(Locale.ROOT));
     }
 
     private final Map<String, String> maps = new HashMap<>();
