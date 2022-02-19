@@ -2,9 +2,10 @@ package tech.nathann.riot4j.json.valMatch;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
+import tech.nathann.riot4j.enums.ValGameMode;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.objects.ValActId;
-import org.immutables.value.Value;
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableMatchInfoData.class)
@@ -18,7 +19,7 @@ public interface MatchInfoData {
     boolean isCompleted();
     String customGameName();
     ValQueueId queueId(); //empty is custom
-    String gameMode();
+    ValGameMode gameMode();
     boolean isRanked();
     ValActId seasonId();
 }

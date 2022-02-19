@@ -1,8 +1,8 @@
 package tech.nathann.riot4j.clients;
 
+import org.immutables.value.Value;
 import tech.nathann.riot4j.enums.RiotRegion;
 import tech.nathann.riot4j.enums.ValRegion;
-import org.immutables.value.Value;
 
 @Value.Immutable
 public abstract class ClientConfig {
@@ -17,4 +17,6 @@ public abstract class ClientConfig {
     public ValRegion valRegion() {
         return ValRegion.NORTH_AMERICA;
     }
+
+    //todo should have a default locale
 }

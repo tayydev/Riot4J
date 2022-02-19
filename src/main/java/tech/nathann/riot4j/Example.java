@@ -1,7 +1,7 @@
 package tech.nathann.riot4j;
 
-import tech.nathann.riot4j.api.match.MatchlistEntry;
 import tech.nathann.riot4j.api.match.ValMatchlist;
+import tech.nathann.riot4j.api.match.ValMatchlistEntry;
 import tech.nathann.riot4j.clients.RiotClientBuilder;
 import tech.nathann.riot4j.clients.RiotProductionAPIClient;
 import tech.nathann.riot4j.enums.ValQueueId;
@@ -22,7 +22,7 @@ public class Example {
                         account.getMatchList().flatMapMany(ValMatchlist::matches)
                                 .filter(entry -> entry.queueId().equals(ValQueueId.COMPETITIVE))
                                 .take(10)
-                                .flatMap(MatchlistEntry::getValMatch)
+                                .flatMap(ValMatchlistEntry::getValMatch)
                                 .map(match -> match.getStatisticalPlayer(account.puuid()).getHeadShotPercentage())
                                 .collect(Collectors.averagingDouble(Float::doubleValue))
                                 .map(result -> Math.round(result * 100))

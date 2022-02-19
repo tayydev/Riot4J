@@ -10,7 +10,7 @@ public enum ValQueueId {
     ESCALATION("ggteam"),
     REPLICATION("onefa"),
     SNOWBALL_FIGHT("snowball"),
-    CUSTOM("");
+    CUSTOM(""); //todo default val?
 
     private final String value;
 

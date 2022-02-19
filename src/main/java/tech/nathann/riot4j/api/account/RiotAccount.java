@@ -1,27 +1,27 @@
 package tech.nathann.riot4j.api.account;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 import tech.nathann.riot4j.api.match.ValMatchlist;
 import tech.nathann.riot4j.clients.RiotDevelopmentAPIClient;
 import tech.nathann.riot4j.clients.RiotProductionAPIClient;
 import tech.nathann.riot4j.enums.ValRegion;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
 import tech.nathann.riot4j.json.riotAccount.RiotAccountData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
-public class RiotAccount { //todo this implements is really only a depreciation feature, should be removed
+public class RiotAccount {
     private static final Logger log = LoggerFactory.getLogger(RiotAccount.class);
 
-    private final RiotDevelopmentAPIClient parent;
+    private final RiotDevelopmentAPIClient client;
     private final RiotAccountData data;
     private final Mono<ActiveShardData> shard;
 
-    public RiotAccount(RiotDevelopmentAPIClient parent, RiotAccountData data) {
-        this.parent = parent;
+    public RiotAccount(RiotDevelopmentAPIClient client, RiotAccountData data) {
+        this.client = client;
         this.data = data;
 
-        shard = parent.getActiveShardsVal(puuid())
+        shard = client.getActiveShardsVal(puuid())
                 .doOnNext(e -> log.debug("Un-MEMORY-cached value for region cached"))
                 .cache();
     }
@@ -30,14 +30,15 @@ public class RiotAccount { //todo this implements is really only a depreciation 
      * @return the matchlist for a given player. Will return empty if the parent of this object does not inherit {@link RiotProductionAPIClient}
      */
     public Mono<ValMatchlist> getMatchList() {
-        if(parent instanceof RiotProductionAPIClient) {
-            return ((RiotProductionAPIClient) parent).getMatchList(this);
+        if(client instanceof RiotProductionAPIClient) {
+            RiotProductionAPIClient prodParent = (RiotProductionAPIClient) client;
+            return getRegion().flatMap(region -> prodParent.getMatchList(region, puuid()));
         }
         return Mono.empty();
     }
 
-    public RiotDevelopmentAPIClient getParent() {
-        return parent; //todo should really be client not parent
+    public RiotDevelopmentAPIClient getClient() {
+        return client;
     }
 
     public RiotAccountData getData() {
@@ -67,7 +68,7 @@ public class RiotAccount { //todo this implements is really only a depreciation 
     @Override
     public String toString() {
         return "RiotAccount{" +
-                "parent=" + parent +
+                "parent=" + client +
                 ", data=" + data +
                 ", shard=" + shard +
                 '}';

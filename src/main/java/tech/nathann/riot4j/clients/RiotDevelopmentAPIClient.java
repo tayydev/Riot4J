@@ -1,28 +1,27 @@
 package tech.nathann.riot4j.clients;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 import tech.nathann.riot4j.api.account.RiotAccount;
+import tech.nathann.riot4j.api.content.ValContent;
 import tech.nathann.riot4j.enums.RiotGame;
 import tech.nathann.riot4j.enums.RiotRegion;
 import tech.nathann.riot4j.enums.ValLocale;
 import tech.nathann.riot4j.enums.ValRegion;
 import tech.nathann.riot4j.exceptions.WebFailure;
-import tech.nathann.riot4j.json.Mapping;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
-import tech.nathann.riot4j.json.valContent.ContentData;
-import tech.nathann.riot4j.json.valLeaderboard.LeaderboardData;
 import tech.nathann.riot4j.json.valLeaderboard.LeaderboardPlayerData;
 import tech.nathann.riot4j.json.valPlatform.PlatformStatusData;
-import tech.nathann.riot4j.objects.Translator;
 import tech.nathann.riot4j.objects.ValActId;
-import tech.nathann.riot4j.objects.ValActIdGroup;
 import tech.nathann.riot4j.objects.ValStatusUpdateEvent;
-import tech.nathann.riot4j.queues.RateLimits;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A DevelopmentClient is the core of this library. The client contains logic for rate limiting and mapping requests.
@@ -85,16 +84,13 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * STATUS:
      */
 
-    //todo abstract more data methods to RiotAPIClient
-
     /**
      * Gets VALORANT's status for a given region.
      * @param region Which VALORANT region to get data from
      * @return a PlatformStatusData containing any incidents / maintenance.
      */
     public Mono<PlatformStatusData> getValStatus(ValRegion region) {
-        return buckets.pushToBucket(RateLimits.VAL_STATUS, getValStatusRaw(token, region.toString()))
-                .map(Mapping.map(PlatformStatusData.class));
+        return getPlatformStatusData(region);
     }
 
     private PlatformStatusData lastData = null;
@@ -124,41 +120,19 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param locale What language to return data in - technically optional on an API level but its just a headache to deal with every language at once
      * @return a content object containing all characters, maps, chromas, skin(Levels)s, equips, gameModes, spray(Levels)s, charm(Levels)s, playerCards, playerTitles, and acts.
      */
-    public Mono<ContentData> getValContent(ValRegion region, ValLocale locale) {
-        return buckets.pushToBucket(RateLimits.VAL_CONTENT, getValContentRaw(token, region.toString(), locale.toString()))
-                .map(Mapping.map(ContentData.class));
+    public Mono<ValContent> getValContent(ValRegion region, ValLocale locale) {
+        return getContentData(region, locale)
+                .map(data -> new ValContent(data));
     }
 
-    /**
-     * Get all ValActIds in an organized object
-     * @return a mono that evaluates to a ValActIdSet
-     */
-    public Mono<ValActIdGroup> getActs() {
-        return getValContent(valRegion, ValLocale.US_ENGLISH)
-                .map(contentData -> new ValActIdGroup(contentData.acts()));
-    }
-
-    /**
-     * Get a new translator object based on latest data
-     * @return a translator object up do date as of when the mono evaluates
-     */
-    public Mono<Translator> getTranslator() {
-        return getValContent(valRegion, ValLocale.US_ENGLISH)
-                .map(contentData -> new Translator(contentData));
-    }
-
-    /**
-     * Gets a chunk of the leaderboards and surrounds it with some other helpful data. See also: {@link #getValLeaderboards(ValRegion, ValActId, long, long)} for a user friendly method.
-     * @param region Which VALORANT region to get data from
-     * @param actId Which act to get data from - will 404 from any act before Episode Two
-     * @param startIndex Where in the leaderboard get players from
-     * @param size How many players to get
-     * @return a leaderboard object with a list of LeaderboardPlayerData
-     */
-    public Mono<LeaderboardData> getValLeaderboardChunk(ValRegion region, ValActId actId, long startIndex, long size) {
-        if(startIndex < 0) return Mono.error(new IndexOutOfBoundsException("Start cannot be negative!"));
-        if(size > 200) return Mono.error(new IndexOutOfBoundsException("Size cannot be greater than 200"));
-        return getLeaderboardData(region, actId, startIndex, size);
+    private final Map<Tuple2<ValRegion, ValLocale>, Mono<ValContent>> cache = new HashMap<>();
+    public Mono<ValContent> getValContentCached(ValRegion region, ValLocale locale) {
+        Tuple2<ValRegion, ValLocale> key = Tuples.of(region, locale);
+        return cache.computeIfAbsent(key, newKey ->
+                getValContent(region, locale)
+                        .doOnNext(e -> log.debug("Caching content!"))
+                        .cache(Duration.ofMinutes(5))
+        );
     }
 
     public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start) {

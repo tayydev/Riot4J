@@ -1,25 +1,24 @@
 package tech.nathann.riot4j.api.match;
 
+import tech.nathann.riot4j.enums.ValGameMode;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.enums.ValRoundResult;
 import tech.nathann.riot4j.enums.ValTeamId;
 import tech.nathann.riot4j.exceptions.MatchParseException;
 import tech.nathann.riot4j.json.valMatch.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ValMatch implements Comparable<ValMatch> {
 
     private final MatchData data;
 
-    public MatchData getData() {
-        return data;
-    }
-
     public ValMatch(MatchData data) {
         this.data = data;
+    }
+
+    public MatchData getData() {
+        return data;
     }
 
     public MatchInfoData matchInfo() {
@@ -133,7 +132,7 @@ public class ValMatch implements Comparable<ValMatch> {
          */
         int headShots = 0;
         int totalShots = 0;
-        for(RoundResultData round: roundResults()) { //todo this loop should be in statisticalValPlayer
+        for(RoundResultData round: roundResults()) {
             PlayerRoundStatsData stats = getPlayerRound(round, puuid);
             for(DamageData fight: stats.damage()) {
                 headShots += fight.headshots();
@@ -153,7 +152,7 @@ public class ValMatch implements Comparable<ValMatch> {
 
     //returns a ValQueueId that represents what GAME MODE is being played eg. if it's a custom deathmatch then it returns deathmatch *instead* of custom
     public ValQueueId gameModeAsQueue() { //todo gamemode should be an object also double check this can't be handled api side
-        String mode = matchInfo().gameMode();
+        String mode = matchInfo().gameMode().toString();
         if(mode.equals("/Game/GameModes/Bomb/BombGameMode.BombGameMode_C")) return ValQueueId.UNRATED;
         if(mode.equals("/Game/GameModes/Deathmatch/DeathmatchGameMode.DeathmatchGameMode_C")) return ValQueueId.DEATHMATCH;
         if(mode.equals("/Game/GameModes/GunGame/GunGameTeamsGameMode.GunGameTeamsGameMode_C")) return ValQueueId.ESCALATION;
@@ -163,10 +162,29 @@ public class ValMatch implements Comparable<ValMatch> {
         throw new MatchParseException("No matching game mode found!");
     }
 
+    public String getGameTypeHuman() {
+        StringJoiner joiner = new StringJoiner(" ");
+
+        if(matchInfo().queueId().equals(ValQueueId.CUSTOM))
+            joiner.add("Custom");
+
+        if(matchInfo().queueId().equals(ValQueueId.UNRATED)) joiner.add("Unrated");
+        if(matchInfo().queueId().equals(ValQueueId.COMPETITIVE)) joiner.add("Competitive");
+
+        ValGameMode mode = matchInfo().gameMode();
+        if(!mode.equals(ValGameMode.BOMB)) {
+            String modeString = mode.name().toUpperCase(Locale.ROOT).substring(0, 1) + mode.name().toLowerCase(Locale.ROOT).substring(1);
+            joiner.add(modeString);
+        }
+
+        return joiner.toString();
+    }
+
+
     //for use in conjunction with Translator#gameModeAsQueue
     public String scoreLine(PlayerData playerData) {
         //funny deathmatch scoreline based on kills
-        if(gameModeAsQueue().equals(ValQueueId.DEATHMATCH)) { //todo this might crash with custom deathmatches with 1 player
+        if(matchInfo().gameMode().equals(ValGameMode.DEATHMATCH)) { //todo this might crash with custom deathmatches with 1 player
             //get list of players sorted by kills
             List<PlayerData> players = new ArrayList<>(players()); //arraylist so modifiable
             players.sort((a, b) -> { //todo players should implement comparable (by kills and/or by combat score), could also help with matchmvp methods

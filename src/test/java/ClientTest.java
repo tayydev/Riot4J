@@ -1,4 +1,7 @@
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import tech.nathann.riot4j.api.account.RiotAccount;
+import tech.nathann.riot4j.api.content.ValContent;
 import tech.nathann.riot4j.api.match.ValMatch;
 import tech.nathann.riot4j.api.match.ValMatchlist;
 import tech.nathann.riot4j.clients.RiotClientBuilder;
@@ -9,13 +12,9 @@ import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.enums.ValRecentQueue;
 import tech.nathann.riot4j.enums.ValRegion;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
-import tech.nathann.riot4j.json.valContent.ContentData;
-import tech.nathann.riot4j.json.valLeaderboard.LeaderboardData;
 import tech.nathann.riot4j.json.valMatch.RecentMatchesData;
 import tech.nathann.riot4j.json.valPlatform.PlatformStatusData;
 import tech.nathann.riot4j.objects.ValActId;
-import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,16 +36,13 @@ public class ClientTest {
                 .doOnNext(e -> System.out.println(e))
                 .blockLast();
 
-        LeaderboardData leaderboard = client.getValLeaderboardChunk(ValRegion.NORTH_AMERICA, ValActId.EPISODE_TWO_ACT_THREE, 100, 100).block();
-
         client.getStatusUpdates(ValRegion.NORTH_AMERICA, Duration.ofSeconds(1)).blockFirst();
 
         PlatformStatusData data = client.getValStatus(ValRegion.NORTH_AMERICA).block();
 
-        ContentData content = client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
+        ValContent content = client.getValContent(ValRegion.NORTH_AMERICA, ValLocale.US_ENGLISH).block();
 
-        client.getActs().map(acts -> acts.getActId(3, 1)).flatMapMany(actId ->
-                client.getValLeaderboards(ValRegion.NORTH_AMERICA, actId, 0))
+        client.getValLeaderboards(ValRegion.NORTH_AMERICA, content.getLatestAct(), 0)
                 .take(1000)
                 .blockLast();
     }
@@ -93,7 +89,7 @@ public class ClientTest {
 
         System.out.println("Second region got.");
 
-        ValMatchlist matchList = client.getMatchList(nate).block();
+        ValMatchlist matchList = nate.getMatchList().block();
 
         matchList.history().get(0).getValMatch().block();
 
