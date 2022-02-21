@@ -187,6 +187,14 @@ public class ValMatch implements Comparable<ValMatch> {
         if(matchInfo().gameMode().equals(ValGameMode.DEATHMATCH)) { //todo this might crash with custom deathmatches with 1 player
             //get list of players sorted by kills
             List<PlayerData> players = new ArrayList<>(players()); //arraylist so modifiable
+
+            //get rid of spectators
+            for(int i = players.size() - 1; i >= 0; i--) {
+                if(players.get(i).stats().isEmpty()) {
+                    players.remove(i);
+                }
+            }
+
             players.sort((a, b) -> { //todo players should implement comparable (by kills and/or by combat score), could also help with matchmvp methods
                 if(a.stats().get().kills() > b.stats().get().kills()) {
                     return -1;
