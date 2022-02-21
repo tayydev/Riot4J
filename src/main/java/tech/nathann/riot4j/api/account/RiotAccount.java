@@ -10,7 +10,7 @@ import tech.nathann.riot4j.enums.ValRegion;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
 import tech.nathann.riot4j.json.riotAccount.RiotAccountData;
 
-public class RiotAccount {
+public class RiotAccount implements Puuid {
     private static final Logger log = LoggerFactory.getLogger(RiotAccount.class);
 
     private final RiotDevelopmentAPIClient client;
