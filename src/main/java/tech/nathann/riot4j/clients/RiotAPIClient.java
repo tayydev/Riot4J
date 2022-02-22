@@ -15,6 +15,9 @@ import tech.nathann.riot4j.objects.ValActId;
 import tech.nathann.riot4j.queues.BucketManager;
 import tech.nathann.riot4j.queues.RateLimits;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * A RiotAPIClient is a generic class that holds a token
  */
@@ -35,7 +38,10 @@ public abstract class RiotAPIClient extends RawAPIInterface {
      */
 
     protected Mono<RiotAccountData> getRiotAccountData(RiotRegion region, String name, String tagline) {
-        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, region.toString(), name, tagline))
+        String nameSanitized = URLEncoder.encode(name, StandardCharsets.UTF_8);
+        String taglineSanitized = URLEncoder.encode(tagline, StandardCharsets.UTF_8);
+
+        return buckets.pushToBucket(RateLimits.ACCOUNT_BY_RIOT_ID, getAccountByNameRaw(token, region.toString(), nameSanitized, taglineSanitized))
                 .map(Mapping.map(RiotAccountData.class));
     }
 
