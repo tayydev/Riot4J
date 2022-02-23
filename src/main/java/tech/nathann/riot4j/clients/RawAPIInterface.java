@@ -2,9 +2,6 @@ package tech.nathann.riot4j.clients;
 
 import reactor.netty.http.client.HttpClient;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 /**
  * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting, mapping logic, or convenience methods.
  */
@@ -55,12 +52,10 @@ public abstract class RawAPIInterface {
     }
 
     protected HttpClient.ResponseReceiver<?> getAccountByNameRaw(String token, String endpoint, String name, String tagLine) {
-        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
-
         return webClient
                 .headers(head -> head.add("X-Riot-Token", token))
                 .get()
-                .uri("https://" + endpoint + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + encodedName + "/" + tagLine);
+                .uri("https://" + endpoint + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + "/" + tagLine);
     }
 
     protected HttpClient.ResponseReceiver<?> getAccountByPuuidRaw(String token, String endpoint, String puuid) {
