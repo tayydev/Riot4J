@@ -26,6 +26,9 @@ public class Request {
     public Mono<String> getRequest() {
         return httpRequest.responseSingle(((response, byteBufMono) -> {
             Mono<String> content = byteBufMono.asString(StandardCharsets.UTF_8);
+
+            log.debug("Headers for request: " + response.responseHeaders());
+
             if(response.status().code() / 100 == 2) return content;
             else return content
                     .switchIfEmpty(Mono.just(""))
