@@ -1,15 +1,14 @@
 package tech.nathann.riot4j.queues.old;
 
+import tech.nathann.riot4j.exceptions.RetryableException;
+import tech.nathann.riot4j.exceptions.WebFailure;
 import io.netty.channel.ConnectTimeoutException;
-import io.netty.channel.unix.Errors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.PrematureCloseException;
-import tech.nathann.riot4j.exceptions.RetryableException;
-import tech.nathann.riot4j.exceptions.WebFailure;
 import tech.nathann.riot4j.queues.RateLimits;
 
 import java.nio.charset.StandardCharsets;
@@ -69,7 +68,7 @@ public class Retryable {
                         return Mono.error(WebFailure.of(response, content));
                     });
         })).onErrorResume(error -> {
-            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof Errors.NativeIoException) {
+            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) { //todo add to new code
                 log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
                 return Mono.error(new RetryableException()); //sketchy but probably fine (see retryableException)
             }
