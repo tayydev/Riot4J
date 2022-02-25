@@ -25,8 +25,8 @@ public class TicketedRequest {
     }
 
     /**
-     * We release the rate limit immediately before the web request, this has the benefit of being less overly conservative, but the drawback that future tries have to get their own ratelimit ticket
-     * @return
+     * We release the rate limit immediately before the web request, this has the benefit of being more agressive, but
+     * the drawback that future tries have to get their own ratelimit ticket
      */
     public Mono<String> getTry() {
         lock.emitValue(Instant.now(), Sinks.EmitFailureHandler.FAIL_FAST); //release rate limit
