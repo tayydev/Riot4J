@@ -1,11 +1,12 @@
 package tech.nathann.riot4j.queues;
 
 public enum RateLimits {
+    RIOT4J_MASTER("master"),
+    RIOT4J_SECONDARY("secondary"),
     VAL_MATCH("match"),
     VAL_MATCHLIST("matchlists"),
     VAL_RECENT_MATCHES("recent"),
     VAL_CONTENT("content"),
-    ACCOUNT_ACTIVE_SHARD_BY_GAME("activeShards"),
     ACCOUNT_BY_RIOT_ID("accountRiotId"),
     ACCOUNT_BY_PUUID("accountPuuid"),
     ACTIVE_SHARDS("shards"),

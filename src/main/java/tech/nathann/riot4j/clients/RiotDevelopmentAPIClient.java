@@ -18,6 +18,7 @@ import tech.nathann.riot4j.json.valLeaderboard.LeaderboardPlayerData;
 import tech.nathann.riot4j.json.valPlatform.PlatformStatusData;
 import tech.nathann.riot4j.objects.ValActId;
 import tech.nathann.riot4j.objects.ValStatusUpdateEvent;
+import tech.nathann.riot4j.queues.Ratelimiter;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -32,8 +33,8 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
     private static final Logger log = LoggerFactory.getLogger(RiotDevelopmentAPIClient.class);
 
-    protected RiotDevelopmentAPIClient(ClientConfig config) {
-        super(config);
+    protected RiotDevelopmentAPIClient(ClientConfig config, Ratelimiter limiter) {
+        super(config, limiter);
     }
 
     /**

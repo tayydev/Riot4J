@@ -1,13 +1,13 @@
-package tech.nathann.riot4j.queues;
+package tech.nathann.riot4j.queues.old;
 
-import tech.nathann.riot4j.exceptions.RateLimitedException;
-import tech.nathann.riot4j.exceptions.WebFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientResponse;
+import tech.nathann.riot4j.exceptions.RateLimitedException;
+import tech.nathann.riot4j.exceptions.WebFailure;
 
 import java.time.Duration;
 

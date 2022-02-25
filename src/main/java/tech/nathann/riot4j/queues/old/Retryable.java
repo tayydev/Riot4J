@@ -1,7 +1,5 @@
-package tech.nathann.riot4j.queues;
+package tech.nathann.riot4j.queues.old;
 
-import tech.nathann.riot4j.exceptions.RetryableException;
-import tech.nathann.riot4j.exceptions.WebFailure;
 import io.netty.channel.ConnectTimeoutException;
 import io.netty.channel.unix.Errors;
 import org.slf4j.Logger;
@@ -10,6 +8,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.PrematureCloseException;
+import tech.nathann.riot4j.exceptions.RetryableException;
+import tech.nathann.riot4j.exceptions.WebFailure;
+import tech.nathann.riot4j.queues.RateLimits;
 
 import java.nio.charset.StandardCharsets;
 

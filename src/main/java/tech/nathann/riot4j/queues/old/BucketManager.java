@@ -1,12 +1,15 @@
-package tech.nathann.riot4j.queues;
+package tech.nathann.riot4j.queues.old;
 
-import tech.nathann.riot4j.exceptions.RateLimitedException;
-import tech.nathann.riot4j.exceptions.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
+import tech.nathann.riot4j.exceptions.RateLimitedException;
+import tech.nathann.riot4j.exceptions.RetryableException;
+import tech.nathann.riot4j.queues.FailureStrategies;
+import tech.nathann.riot4j.queues.RateLimits;
+import tech.nathann.riot4j.queues.Ratelimiter;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -14,7 +17,7 @@ import java.util.HashMap;
 /**
  * A bucket manager handles all the actual web requests of its owned buckets, and provides a convenience map so outside methods can push to buckets
  */
-public class BucketManager {
+public class BucketManager implements Ratelimiter {
     //map using enum for organization
     private final HashMap<RateLimits, Bucket> buckets = new HashMap<>();
     private final Sinks.Many<Retryable> in = Sinks.many().unicast().onBackpressureBuffer();
@@ -77,7 +80,7 @@ public class BucketManager {
     }
 
     //public method to access teh manager. Allows a user to push to a bucket given a key enum. Creates buckets as necessary.
-    public Mono<String> pushToBucket(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
+    public Mono<String> push(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
         return Mono.defer(() -> { //defer to prevent accidental early subscription
             log.debug("Input pushed to bucket " + limit);
             Bucket bucket = buckets.computeIfAbsent(limit,

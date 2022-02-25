@@ -1,9 +1,10 @@
 package tech.nathann.riot4j.clients;
 
+import reactor.core.publisher.Mono;
 import tech.nathann.riot4j.enums.RiotRegion;
 import tech.nathann.riot4j.enums.ValRegion;
 import tech.nathann.riot4j.exceptions.InvalidTokenException;
-import reactor.core.publisher.Mono;
+import tech.nathann.riot4j.queues.nlimiter.RatePresets;
 
 public class RiotClientBuilder {
     public static RiotClientBuilder create() {
@@ -33,7 +34,7 @@ public class RiotClientBuilder {
     public Mono<RiotDevelopmentAPIClient> buildDevClient() {
         ClientConfig config = builder.build();
 
-        return new RiotDevelopmentAPIClient(config).test()
+        return new RiotDevelopmentAPIClient(config, RatePresets.DEV_CLIENT).test()
                 .onErrorResume(e -> Mono.error(new InvalidTokenException("The token specified is not valid")))
                 .ofType(RiotDevelopmentAPIClient.class);
     }
@@ -41,7 +42,7 @@ public class RiotClientBuilder {
     public Mono<RiotProductionAPIClient> buildProductionClient() {
         ClientConfig config = builder.build();
 
-        return new RiotProductionAPIClient(config).test()
+        return new RiotProductionAPIClient(config, RatePresets.PROD_CLIENT).test()
                 .onErrorResume(e -> Mono.error(new InvalidTokenException("The token specified is not valid")))
                 .ofType(RiotProductionAPIClient.class);
     }
