@@ -46,11 +46,15 @@ public class ProactiveRatelimiter implements Ratelimiter {
     }
 
     public Mono<String> push(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
-        Dispenser bucket = buckets.get(limit);
-        Request request = new Request(input);
-        TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
-        ingest.emitNext(ticketed, FailureStrategies.RETRY_ON_SERIALIZED);
-        return request.getResponse();
+        return Mono.defer(() -> {
+                    Dispenser bucket = buckets.get(limit);
+                    Request request = new Request(input);
+                    TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
+                    ingest.emitNext(ticketed, FailureStrategies.RETRY_ON_SERIALIZED);
+                    return request.getResponse();
+                }
+        );
+
     }
 
     private Instant future = Instant.EPOCH;
