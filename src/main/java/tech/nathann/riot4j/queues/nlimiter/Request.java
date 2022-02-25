@@ -1,7 +1,7 @@
 package tech.nathann.riot4j.queues.nlimiter;
 
 import io.netty.channel.ConnectTimeoutException;
-import io.netty.channel.unix.Errors;
+import io.netty.handler.codec.EncoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -31,7 +31,7 @@ public class Request {
                     .switchIfEmpty(Mono.just(""))
                     .flatMap(data -> Mono.error(WebFailure.of(response, data)));
         })).onErrorResume(error -> {
-            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof Errors.NativeIoException) {
+            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) {
                 log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
                 return Mono.error(new RetryableException());
             }
