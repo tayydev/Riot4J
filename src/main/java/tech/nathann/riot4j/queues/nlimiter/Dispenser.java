@@ -65,6 +65,10 @@ public class Dispenser {
         return temp.response.asMono();
     }
 
+    public RateLimits getLimit() {
+        return limit;
+    }
+
     private static class Wrap {
         private final Sinks.One<TicketedRequest> response = Sinks.one();
         private final TicketedRequest request;

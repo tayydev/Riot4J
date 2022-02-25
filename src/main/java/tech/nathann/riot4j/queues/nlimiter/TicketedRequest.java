@@ -24,13 +24,19 @@ public class TicketedRequest {
         this.bucket = bucket;
     }
 
+    /**
+     * We release the rate limit immediately before the web request, this has the benefit of being less overly conservative, but the drawback that future tries have to get their own ratelimit ticket
+     * @return
+     */
     public Mono<String> getTry() {
+        lock.emitValue(Instant.now(), Sinks.EmitFailureHandler.FAIL_FAST); //release rate limit
         return request.getRequest()
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
-                    log.error("GOT RATE LIMIT, DELAYING " + length);
+                    log.error(bucket.getLimit() + " GOT RATE LIMIT, DELAYING " + length);
                     master.limit(length);
-                    return Mono.delay(length).flatMap(fin -> getTry()); //delay then retry
+                    return Mono.delay(length)
+                            .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
                     retryCount++;
@@ -41,11 +47,14 @@ public class TicketedRequest {
                     Duration length = Duration.ofSeconds(retryTime());
                     log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
                     return Mono.delay(length)
-                            .flatMap(fin -> getTry());
+                            .flatMap(fin -> getRetry());
                 })
-                .doOnEach(any -> lock.emitValue(Instant.now(), Sinks.EmitFailureHandler.FAIL_FAST)) //release rate limit
                 .doOnNext(fin -> request.getCallback().emitValue(fin, Sinks.EmitFailureHandler.FAIL_FAST))
                 .doOnError(err -> request.getCallback().emitError(err, Sinks.EmitFailureHandler.FAIL_FAST));
+    }
+
+    private Mono<String> getRetry() {
+        return master.push(bucket.getLimit(), request.getRaw());
     }
 
     public Mono<Instant> getLock() {

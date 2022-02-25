@@ -27,7 +27,7 @@ public class Request {
         return httpRequest.responseSingle(((response, byteBufMono) -> {
             Mono<String> content = byteBufMono.asString(StandardCharsets.UTF_8);
 
-            log.debug("Headers for request: " + response.responseHeaders());
+            log.debug("Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
 
             if(response.status().code() / 100 == 2) return content;
             else return content
@@ -48,5 +48,9 @@ public class Request {
 
     public Mono<String> getResponse() {
         return callback.asMono();
+    }
+
+    public HttpClient.ResponseReceiver<?> getRaw() {
+        return httpRequest;
     }
 }
