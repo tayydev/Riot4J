@@ -9,7 +9,7 @@ import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.PrematureCloseException;
 import tech.nathann.riot4j.exceptions.RetryableException;
-import tech.nathann.riot4j.exceptions.WebFailure;
+import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.nio.charset.StandardCharsets;
 
@@ -29,15 +29,15 @@ public class Request {
 
             if(response.status().code() / 100 == 2) return content;
             else {
-                log.warn("Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
+                log.warn("Status is " + response.status().code()  + "Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
                 return content
                         .switchIfEmpty(Mono.just(""))
-                        .flatMap(data -> Mono.error(WebFailure.of(response, data)));
+                        .flatMap(data -> Mono.error(FailureStrategies.makeWebException(response, data)));
             }
         })).onErrorResume(error -> {
             if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) {
                 log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
-                return Mono.error(new RetryableException());
+                return Mono.error(new RetryableException(error));
             }
             else return Mono.error(error);
         });

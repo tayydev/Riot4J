@@ -2,7 +2,7 @@ package tech.nathann.riot4j.exceptions;
 
 import reactor.netty.http.client.HttpClientResponse;
 
-public class RateLimitedException extends WebFailure {
+public class RateLimitedException extends WebException {
     private final int secs;
     private final boolean isMethod;
 

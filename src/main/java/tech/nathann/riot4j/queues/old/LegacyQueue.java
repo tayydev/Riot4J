@@ -7,7 +7,7 @@ import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientResponse;
 import tech.nathann.riot4j.exceptions.RateLimitedException;
-import tech.nathann.riot4j.exceptions.WebFailure;
+import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.time.Duration;
 
@@ -59,7 +59,7 @@ public class LegacyQueue { //todo depreciate so we can have retries in rso clien
         //yes errors
         return contentMono
                 .switchIfEmpty(Mono.just("")) //make sure we don't eat errors w/out body
-                .flatMap(content -> Mono.error(WebFailure.of(response, content)));
+                .flatMap(content -> Mono.error(FailureStrategies.makeWebException(response, content)));
     }
 
     public static class Request {

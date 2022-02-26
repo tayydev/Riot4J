@@ -3,6 +3,10 @@ package tech.nathann.riot4j.queues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Sinks;
+import reactor.netty.http.client.HttpClientResponse;
+import tech.nathann.riot4j.exceptions.RateLimitedException;
+import tech.nathann.riot4j.exceptions.RetryableException;
+import tech.nathann.riot4j.exceptions.WebException;
 
 import java.util.concurrent.locks.LockSupport;
 
@@ -20,4 +24,18 @@ public class FailureStrategies {
             return Sinks.EmitFailureHandler.FAIL_FAST.onEmitFailure(signalType, emitResult); //if we dont have a serial error we let the fail fast handler deal with it
         }
     });
+
+    public static RuntimeException makeWebException(HttpClientResponse response, String content) {
+        //if ratelimited
+        if(response.status().code() == 429) {
+            return new RateLimitedException(response, content);
+        }
+
+        //else if webfail
+        WebException error = new WebException(response, content);
+        if(response.status().code() / 100 == 5) {
+            return new RetryableException(error);
+        }
+        return error;
+    }
 }

@@ -12,7 +12,7 @@ import tech.nathann.riot4j.enums.RiotGame;
 import tech.nathann.riot4j.enums.RiotRegion;
 import tech.nathann.riot4j.enums.ValLocale;
 import tech.nathann.riot4j.enums.ValRegion;
-import tech.nathann.riot4j.exceptions.WebFailure;
+import tech.nathann.riot4j.exceptions.WebException;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
 import tech.nathann.riot4j.json.valLeaderboard.LeaderboardPlayerData;
 import tech.nathann.riot4j.json.valPlatform.PlatformStatusData;
@@ -48,7 +48,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
      * @param riotRegion a string representation of the desired RIOT region (eg 'americas' instead of 'na')
      * @param name username to search for
      * @param tagLine tag to search for
-     * @return returns a {@link WebFailure} with error code 404 if user not found
+     * @return returns a {@link WebException} with error code 404 if user not found
      */
     public Mono<RiotAccount> getRiotAccountByName(RiotRegion riotRegion, String name, String tagLine) {
         return getRiotAccountData(riotRegion, name, tagLine)

@@ -9,7 +9,7 @@ import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.PrematureCloseException;
 import tech.nathann.riot4j.exceptions.RetryableException;
-import tech.nathann.riot4j.exceptions.WebFailure;
+import tech.nathann.riot4j.queues.FailureStrategies;
 import tech.nathann.riot4j.queues.RateLimits;
 
 import java.nio.charset.StandardCharsets;
@@ -66,12 +66,12 @@ public class Retryable {
             return contentMono
                     .switchIfEmpty(Mono.just("")) //make sure we don't eat errors w/out body
                     .flatMap(content -> { //save body of the error
-                        return Mono.error(WebFailure.of(response, content));
+                        return Mono.error(FailureStrategies.makeWebException(response, content));
                     });
         })).onErrorResume(error -> {
             if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) {
                 log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
-                return Mono.error(new RetryableException()); //sketchy but probably fine (see retryableException)
+                return Mono.error(new RetryableException(error));
             }
             return Mono.error(error); //todo better handle for unknown errors
         });
