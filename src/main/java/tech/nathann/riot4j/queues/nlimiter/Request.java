@@ -36,7 +36,7 @@ public class Request {
             }
         })).onErrorResume(error -> {
             if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) {
-                log.warn("Converting Netty error " + error.getMessage() + " to empty RetryableException");
+                log.warn("Converting Netty error " + error + " to empty RetryableException");
                 return Mono.error(new RetryableException(error));
             }
             else return Mono.error(error);
