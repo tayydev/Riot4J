@@ -50,7 +50,11 @@ public class TicketedRequest {
                             .flatMap(fin -> getRetry());
                 })
                 .doOnNext(fin -> request.getCallback().emitValue(fin, Sinks.EmitFailureHandler.FAIL_FAST))
-                .doOnError(err -> request.getCallback().emitError(err, Sinks.EmitFailureHandler.FAIL_FAST));
+                .onErrorResume(throwable -> {
+                    log.warn("Error passing through " + bucket.getLimit() +  " bucket: " + throwable.toString());
+                    request.getCallback().emitError(throwable, Sinks.EmitFailureHandler.FAIL_FAST);
+                    return Mono.empty();
+                });
     }
 
     private Mono<String> getRetry() {
