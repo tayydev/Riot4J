@@ -2,6 +2,7 @@ package tech.nathann.riot4j.queues.nlimiter;
 
 import io.netty.channel.ConnectTimeoutException;
 import io.netty.handler.codec.EncoderException;
+import io.netty.util.IllegalReferenceCountException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -29,13 +30,13 @@ public class Request {
 
             if(response.status().code() / 100 == 2) return content;
             else {
-                log.warn("Status is " + response.status().code()  + "Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
+                log.warn("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
                 return content
                         .switchIfEmpty(Mono.just(""))
                         .flatMap(data -> Mono.error(FailureStrategies.makeWebException(response, data)));
             }
         })).onErrorResume(error -> {
-            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException) {
+            if(error instanceof PrematureCloseException || error instanceof ConnectTimeoutException || error instanceof EncoderException || error instanceof IllegalReferenceCountException) {
                 log.warn("Converting Netty error " + error + " to empty RetryableException");
                 return Mono.error(new RetryableException(error));
             }
