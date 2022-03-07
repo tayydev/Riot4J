@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import tech.nathann.riot4j.exceptions.RateLimitedException;
 import tech.nathann.riot4j.exceptions.RetryableException;
+import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -29,7 +30,7 @@ public class TicketedRequest {
      * the drawback that future tries have to get their own ratelimit ticket
      */
     public Mono<String> getTry() {
-        lock.emitValue(Instant.now(), Sinks.EmitFailureHandler.FAIL_FAST); //release rate limit
+        lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED); //release rate limit
         return request.getRequest()
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
@@ -49,10 +50,10 @@ public class TicketedRequest {
                     return Mono.delay(length)
                             .flatMap(fin -> getRetry());
                 })
-                .doOnNext(fin -> request.getCallback().emitValue(fin, Sinks.EmitFailureHandler.FAIL_FAST))
+                .doOnNext(fin -> request.getCallback().emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 .onErrorResume(throwable -> {
                     log.warn("Error passing through " + bucket.getLimit() +  " bucket: " + throwable.toString());
-                    request.getCallback().emitError(throwable, Sinks.EmitFailureHandler.FAIL_FAST);
+                    request.getCallback().emitError(throwable, FailureStrategies.RETRY_ON_SERIALIZED);
                     return Mono.empty();
                 });
     }

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import tech.nathann.riot4j.queues.FailureStrategies;
 import tech.nathann.riot4j.queues.RateLimits;
 
 import java.time.Duration;
@@ -29,7 +30,7 @@ public class Dispenser {
         queue.asFlux()
                 .concatMap(request ->
                         getTicket(request.request)
-                                .doOnNext(fin -> request.response.emitValue(fin, Sinks.EmitFailureHandler.FAIL_FAST))
+                                .doOnNext(fin -> request.response.emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 ).subscribe();
     }
 
@@ -62,7 +63,7 @@ public class Dispenser {
 
     public Mono<TicketedRequest> pushTicket(TicketedRequest request) {
         Wrap temp = new Wrap(request);
-        queue.emitNext(temp, Sinks.EmitFailureHandler.FAIL_FAST);
+        queue.emitNext(temp, FailureStrategies.RETRY_ON_SERIALIZED);
         return temp.response.asMono();
     }
 
