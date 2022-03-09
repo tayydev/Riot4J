@@ -42,4 +42,11 @@ public class ValContent {
     public String mapName(String mapPath) {
         return maps.get(mapPath);
     }
+
+    public static String getCharacterURL(String id) {
+        return "https://github.com/NathanNorth/ValorantAssets/raw/main/icons/characters/" + id + ".png";
+    }
+    public static String getRankURL(int rank) {
+        return "https://github.com/NathanNorth/ValorantAssets/raw/main/icons/ranked/" + rank + ".png";
+    }
 }

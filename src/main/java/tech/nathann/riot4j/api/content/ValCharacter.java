@@ -11,11 +11,6 @@ public class ValCharacter {
         this.name = name;
     }
 
-    //todo use this somehow
-    public String getURL() {
-        return "https://github.com/NathanNorth/ValorantAssets/raw/main/icons/characters/" + id + ".png";
-    }
-
     public String getId() {
         return id;
     }
