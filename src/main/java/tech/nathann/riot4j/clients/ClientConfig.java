@@ -1,8 +1,8 @@
 package tech.nathann.riot4j.clients;
 
 import org.immutables.value.Value;
-import tech.nathann.riot4j.enums.RiotRegion;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.RiotRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 
 @Value.Immutable
 public abstract class ClientConfig {

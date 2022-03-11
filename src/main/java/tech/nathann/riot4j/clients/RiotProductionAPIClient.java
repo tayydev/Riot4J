@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 import tech.nathann.riot4j.api.match.ValMatch;
 import tech.nathann.riot4j.api.match.ValMatchlist;
 import tech.nathann.riot4j.enums.ValRecentQueue;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.valMatch.RecentMatchesData;
 import tech.nathann.riot4j.queues.Ratelimiter;
 

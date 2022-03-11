@@ -1,8 +1,8 @@
 package tech.nathann.riot4j.clients;
 
 import reactor.core.publisher.Mono;
-import tech.nathann.riot4j.enums.RiotRegion;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.RiotRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.exceptions.InvalidTokenException;
 import tech.nathann.riot4j.queues.nlimiter.RatePresets;
 

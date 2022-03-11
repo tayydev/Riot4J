@@ -1,11 +1,11 @@
-package tech.nathann.riot4j.enums;
+package tech.nathann.riot4j.enums.regions;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Val regions represent valid regions to execute api calls against
  */
-public enum ValRegion {
+public enum ValRegion implements Region {
     NORTH_AMERICA("na"),
     BRAZIL("br"),
     EUROPE("eu"),

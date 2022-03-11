@@ -2,7 +2,7 @@ package tech.nathann.riot4j.api.match;
 
 import reactor.core.publisher.Flux;
 import tech.nathann.riot4j.clients.RiotProductionAPIClient;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.valMatch.MatchlistData;
 
 import java.util.List;

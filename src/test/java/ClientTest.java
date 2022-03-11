@@ -10,7 +10,7 @@ import tech.nathann.riot4j.clients.RiotProductionAPIClient;
 import tech.nathann.riot4j.enums.ValLocale;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.enums.ValRecentQueue;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
 import tech.nathann.riot4j.json.valMatch.RecentMatchesData;
 import tech.nathann.riot4j.json.valPlatform.PlatformStatusData;

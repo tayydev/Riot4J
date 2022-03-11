@@ -1,8 +1,8 @@
-package tech.nathann.riot4j.enums;
+package tech.nathann.riot4j.enums.regions;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum RiotRegion {
+public enum RiotRegion implements Region {
     AMERICAS("americas"),
     ASIA("asia"),
     EUROPE("europe"),

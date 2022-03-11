@@ -3,7 +3,7 @@ package tech.nathann.riot4j.json.riotAccount;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import tech.nathann.riot4j.enums.RiotGame;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import org.immutables.value.Value;
 
 @Value.Immutable

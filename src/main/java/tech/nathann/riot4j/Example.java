@@ -5,7 +5,7 @@ import tech.nathann.riot4j.api.match.ValMatchlistEntry;
 import tech.nathann.riot4j.clients.RiotClientBuilder;
 import tech.nathann.riot4j.clients.RiotProductionAPIClient;
 import tech.nathann.riot4j.enums.ValQueueId;
-import tech.nathann.riot4j.enums.ValRegion;
+import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.objects.ValActId;
 
 import java.util.stream.Collectors;

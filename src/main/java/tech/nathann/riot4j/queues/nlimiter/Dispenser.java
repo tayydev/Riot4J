@@ -20,11 +20,11 @@ public class Dispenser {
 
     private final Sinks.Many<Wrap> queue = Sinks.many().unicast().onBackpressureBuffer();
 
-    public Dispenser(RateLimits limit, Duration reset, int count) {
+    public Dispenser(RateLimits limit) {
         this.limit = limit;
-        this.reset = reset;
+        this.reset = limit.getLength();
 
-        tickets = new Mono[count];
+        tickets = new Mono[limit.getCount()];
         Arrays.fill(tickets, Mono.just(Instant.EPOCH));
 
         queue.asFlux()

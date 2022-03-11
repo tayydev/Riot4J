@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
+import tech.nathann.riot4j.enums.regions.Region;
 import tech.nathann.riot4j.exceptions.RateLimitedException;
 import tech.nathann.riot4j.exceptions.RetryableException;
 import tech.nathann.riot4j.queues.FailureStrategies;
@@ -80,7 +81,7 @@ public class BucketManager implements Ratelimiter {
     }
 
     //public method to access teh manager. Allows a user to push to a bucket given a key enum. Creates buckets as necessary.
-    public Mono<String> push(RateLimits limit, HttpClient.ResponseReceiver<?> input) {
+    public Mono<String> push(RateLimits limit, Region region, HttpClient.ResponseReceiver<?> input) {
         return Mono.defer(() -> { //defer to prevent accidental early subscription
             log.debug("Input pushed to bucket " + limit);
             Bucket bucket = buckets.computeIfAbsent(limit,
