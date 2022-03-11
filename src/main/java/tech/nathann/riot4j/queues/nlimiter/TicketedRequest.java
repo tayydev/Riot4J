@@ -10,6 +10,7 @@ import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TicketedRequest {
     private static final Logger log = LoggerFactory.getLogger(TicketedRequest.class);
@@ -40,13 +41,13 @@ public class TicketedRequest {
                             .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
-                    retryCount++;
-                    if(retryCount > 10) { //give up
-                        log.error("Retried MAX amount " + retryCount + " of times. Dropping...");
+                    int count = retryCount.incrementAndGet();
+                    if(count > 10) { //give up
+                        log.error("Retried MAX amount " + count + " of times. Dropping...");
                         return Mono.error(retry);
                     }
-                    Duration length = Duration.ofSeconds(retryTime());
-                    log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
+                    Duration length = Duration.ofSeconds(retryTime(count));
+                    log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + count +  " for this request");
                     return Mono.delay(length)
                             .flatMap(fin -> getRetry());
                 })
@@ -66,9 +67,9 @@ public class TicketedRequest {
         return lock.asMono();
     }
 
-    private int retryCount = 0;
-    private int retryTime() {
-        return (int) Math.pow(retryCount, 2);
+    private final AtomicInteger retryCount = new AtomicInteger(0);
+    private int retryTime(int source) {
+        return (int) Math.pow(source, 2);
     }
 
     public Dispenser getBucket() {
