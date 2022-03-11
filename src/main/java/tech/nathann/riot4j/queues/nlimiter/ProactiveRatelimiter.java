@@ -54,7 +54,14 @@ public class ProactiveRatelimiter implements Ratelimiter {
                     return request.getResponse();
                 }
         );
+    }
 
+    //when a bucket needs to retry it needs the SAME ticketed request to go through so that the delay is respected
+    public Mono<String> pushRetry(TicketedRequest retry) {
+        return Mono.defer(() -> {
+            ingest.emitNext(retry, FailureStrategies.RETRY_ON_SERIALIZED);
+            return retry.getRequest().getResponse();
+        });
     }
 
     private Instant future = Instant.EPOCH;
