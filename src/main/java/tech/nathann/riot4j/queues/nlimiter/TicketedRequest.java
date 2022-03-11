@@ -40,12 +40,12 @@ public class TicketedRequest {
                             .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
-                    retryCount++;
                     if(retryCount > 10) { //give up
                         log.error("Retried MAX amount " + retryCount + " of times. Dropping...");
                         return Mono.error(retry);
                     }
-                    Duration length = Duration.ofSeconds(retryTime());
+                    Duration length = Duration.ofSeconds(retryTime()); //should be 1 2 4 8 16 etc
+                    retryCount++;
                     log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
                     return Mono.delay(length)
                             .flatMap(fin -> getRetry());
@@ -68,7 +68,7 @@ public class TicketedRequest {
 
     private int retryCount = 0;
     private int retryTime() {
-        return (int) Math.pow(retryCount, 2);
+        return (int) Math.pow(2, retryCount);
     }
 
     public Dispenser getBucket() {
