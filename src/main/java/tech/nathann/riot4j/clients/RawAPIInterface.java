@@ -7,7 +7,11 @@ import reactor.netty.http.client.HttpClient;
  */
 public abstract class RawAPIInterface {
 
-    protected final HttpClient webClient = HttpClient.create();
+    private final HttpClient webClient;
+
+    public RawAPIInterface(HttpClient webClient) {
+        this.webClient = webClient;
+    }
 
     protected HttpClient.ResponseReceiver<?> getValStatusRaw(String token, String region) {
         return webClient

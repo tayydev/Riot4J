@@ -1,6 +1,7 @@
 package tech.nathann.riot4j.clients;
 
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import tech.nathann.riot4j.enums.*;
 import tech.nathann.riot4j.json.Mapping;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
@@ -17,6 +18,7 @@ import tech.nathann.riot4j.queues.Ratelimiter;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 /**
  * A RiotAPIClient is a generic class that holds a token
@@ -29,6 +31,12 @@ public abstract class RiotAPIClient extends RawAPIInterface {
     protected final Ratelimiter limiter;
 
     protected RiotAPIClient(ClientConfig config, Ratelimiter limiter) {
+        super(
+                HttpClient
+                        .create()
+                        .responseTimeout(Duration.ofSeconds(5))
+        );
+
         this.token = config.token();
         this.riotRegion = config.riotRegion();
         this.valRegion = config.valRegion();
