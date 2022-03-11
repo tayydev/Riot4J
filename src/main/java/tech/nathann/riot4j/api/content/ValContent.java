@@ -44,6 +44,7 @@ public class ValContent {
     }
 
     public static String getCharacterURL(String id) {
+        id = id.toUpperCase(Locale.ROOT);
         return "https://github.com/NathanNorth/ValorantAssets/raw/main/icons/characters/" + id + ".png";
     }
     public static String getRankURL(int rank) {
