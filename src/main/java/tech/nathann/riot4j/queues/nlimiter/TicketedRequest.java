@@ -30,14 +30,13 @@ public class TicketedRequest {
      * the drawback that future tries have to get their own ratelimit ticket
      */
     public Mono<String> getTry() {
-        lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED); //release rate limit
         return request.getRequest()
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
                     log.error(bucket.getLimit() + " GOT RATE LIMIT, DELAYING " + length);
                     master.limit(length);
                     return Mono.delay(length)
-                            .flatMap(fin -> getRetry()); //delay then retry
+                            .flatMap(fin -> getTry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
                     if(retryCount > 10) { //give up
@@ -48,18 +47,15 @@ public class TicketedRequest {
                     retryCount++;
                     log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
                     return Mono.delay(length)
-                            .flatMap(fin -> getRetry());
+                            .flatMap(fin -> getTry());
                 })
+                .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED))
                 .doOnNext(fin -> request.getCallback().emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 .onErrorResume(throwable -> {
                     log.warn("Error passing through " + bucket.getLimit() +  " bucket: " + throwable.toString());
                     request.getCallback().emitError(throwable, FailureStrategies.RETRY_ON_SERIALIZED);
                     return Mono.empty();
                 });
-    }
-
-    private Mono<String> getRetry() {
-        return master.pushRetry(this);
     }
 
     public Mono<Instant> getLock() {
