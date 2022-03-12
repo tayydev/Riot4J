@@ -23,8 +23,8 @@ public class ProactiveRatelimiter implements Ratelimiter {
     private final Sinks.Many<TicketedRequest> ingest = Sinks.many().unicast().onBackpressureBuffer();
 
     public ProactiveRatelimiter(RateLimits masterLimit, RateLimits secondaryLimit, List<RateLimits> respectedLimits) {
-        Dispenser master = new Dispenser(masterLimit);
-        Dispenser secondary = new Dispenser(secondaryLimit);
+        Dispenser master = new Dispenser(masterLimit, null);
+        Dispenser secondary = new Dispenser(secondaryLimit, null);
 
         this.buckets = new HashMap<>();
         for(RateLimits limit: respectedLimits) {
@@ -53,7 +53,7 @@ public class ProactiveRatelimiter implements Ratelimiter {
     public Mono<String> push(RateLimits limit, Region region, HttpClient.ResponseReceiver<?> input) {
         return Mono.defer(() -> {
                     Dispenser bucket = buckets.get(limit) //get map<region, bucket>
-                            .computeIfAbsent(region, key -> new Dispenser(limit)); //get actual bucket
+                            .computeIfAbsent(region, key -> new Dispenser(limit, region)); //get actual bucket
                     Request request = new Request(input);
                     TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
                     ingest.emitNext(ticketed, FailureStrategies.RETRY_ON_SERIALIZED);

@@ -29,7 +29,10 @@ public class Request {
         return httpRequest.responseSingle(((response, byteBufMono) -> {
             Mono<String> content = byteBufMono.asString(StandardCharsets.UTF_8);
 
-            if(response.status().code() / 100 == 2) return content;
+            if(response.status().code() / 100 == 2) {
+                log.info("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
+                return content;
+            }
             else {
                 log.warn("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
                 return content

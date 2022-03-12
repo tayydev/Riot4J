@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import tech.nathann.riot4j.enums.regions.Region;
 import tech.nathann.riot4j.queues.FailureStrategies;
 import tech.nathann.riot4j.queues.RateLimits;
 
@@ -15,13 +16,16 @@ public class Dispenser {
     private static final Logger log = LoggerFactory.getLogger(Dispenser.class);
 
     private final RateLimits limit;
+    private final Region region;
+
     private final Duration reset;
     private final Mono<Instant>[] tickets;
 
     private final Sinks.Many<Wrap> queue = Sinks.many().unicast().onBackpressureBuffer();
 
-    public Dispenser(RateLimits limit) {
+    public Dispenser(RateLimits limit, Region region) {
         this.limit = limit;
+        this.region = region;
         this.reset = limit.getLength();
 
         tickets = new Mono[limit.getCount()];
@@ -32,6 +36,8 @@ public class Dispenser {
                         getTicket(request.request)
                                 .doOnNext(fin -> request.response.emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 ).subscribe();
+
+        log.info("Created bucket: " + this);
     }
 
     private int position = 0;
@@ -54,7 +60,7 @@ public class Dispenser {
             } else {
                 Duration delay = reset.minus(timePassed);
                 if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only care if delay is over 1 second
-                    log.warn("Ticket at pos " + pos + " for bucket " + limit + " isn't free, delaying " + delay);
+                    log.warn("Ticket at pos " + pos + " for  " + this + " isn't free, delaying " + delay);
                 return Mono.delay(delay)
                         .flatMap(fin -> getTicket(request));
             }
@@ -78,5 +84,13 @@ public class Dispenser {
         public Wrap(TicketedRequest request) {
             this.request = request;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Dispenser{" +
+                "limit=" + limit +
+                ", region=" + region +
+                '}';
     }
 }
