@@ -30,7 +30,7 @@ public class Request {
             Mono<String> content = byteBufMono.asString(StandardCharsets.UTF_8);
 
             if(response.status().code() / 100 == 2) {
-                log.info("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
+                log.debug("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
                 return content;
             }
             else {
