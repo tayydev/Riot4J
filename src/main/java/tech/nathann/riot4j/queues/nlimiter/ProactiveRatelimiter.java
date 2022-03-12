@@ -62,6 +62,13 @@ public class ProactiveRatelimiter implements Ratelimiter {
         );
     }
 
+    public Mono<String> pushRetry(TicketedRequest ticket) {
+        return Mono.defer(() -> {
+            ingest.emitNext(ticket, FailureStrategies.RETRY_ON_SERIALIZED);
+            return ticket.getRequest().getResponse();
+        });
+    }
+
     private Instant future = Instant.EPOCH;
     public void limit(Duration time) {
         log.info("Ratelimiter got limit " + time);

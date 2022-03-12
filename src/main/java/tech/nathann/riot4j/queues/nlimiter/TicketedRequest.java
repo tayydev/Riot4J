@@ -31,15 +31,16 @@ public class TicketedRequest {
      */
     public Mono<String> getTry() {
         return request.getRequest()
+                .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
                     log.error(bucket.getLimit() + " GOT RATE LIMIT, DELAYING " + length);
                     master.limit(length);
                     return Mono.delay(length)
-                            .flatMap(fin -> getTry()); //delay then retry
+                            .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
-                    if(retryCount > 10) { //give up
+                    if(retryCount > 7) { //give up
                         log.error("Retried MAX amount " + retryCount + " of times. Dropping...");
                         return Mono.error(retry);
                     }
@@ -47,15 +48,18 @@ public class TicketedRequest {
                     retryCount++;
                     log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
                     return Mono.delay(length)
-                            .flatMap(fin -> getTry());
+                            .flatMap(fin -> getRetry());
                 })
-                .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED))
                 .doOnNext(fin -> request.getCallback().emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 .onErrorResume(throwable -> {
                     log.warn("Error passing through " + bucket.getLimit() +  " bucket: " + throwable.toString());
                     request.getCallback().emitError(throwable, FailureStrategies.RETRY_ON_SERIALIZED);
                     return Mono.empty();
                 });
+    }
+
+    private Mono<String> getRetry() {
+        return master.pushRetry(this);
     }
 
     public Mono<Instant> getLock() {
