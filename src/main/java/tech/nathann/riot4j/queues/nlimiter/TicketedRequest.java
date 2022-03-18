@@ -36,7 +36,7 @@ public class TicketedRequest {
                     Duration length = Duration.ofSeconds(rate.getSecs());
                     log.error(bucket.getLimit() + " GOT RATE LIMIT, DELAYING " + length);
                     master.limit(length);
-                    return Mono.delay(length)
+                    return Mono.delay(length) //todo technically unnecessary since we lock master but ehhhh
                             .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
