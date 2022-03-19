@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.http.client.HttpClientResponse;
 import tech.nathann.riot4j.exceptions.RateLimitedException;
+import tech.nathann.riot4j.exceptions.RetryableException;
 import tech.nathann.riot4j.queues.FailureStrategies;
+import tech.nathann.riot4j.queues.nlimiter.Request;
 
 import java.time.Duration;
 
-public class LegacyQueue { //todo depreciate so we can have retries in rso client
+public class LegacyQueue {
     private final Sinks.Many<Request> in = Sinks.many().multicast().onBackpressureBuffer(1024, false);
 
     private Logger log = LoggerFactory.getLogger(LegacyQueue.class);
@@ -28,45 +29,29 @@ public class LegacyQueue { //todo depreciate so we can have retries in rso clien
     public Mono<String> push(HttpClient.ResponseReceiver<?> input) {
         return Mono.defer(() -> {
                     Request r = new Request(input);
-                    in.emitNext(r, Sinks.EmitFailureHandler.FAIL_FAST);
-                    return r.response.asMono();
+                    in.emitNext(r, FailureStrategies.RETRY_ON_SERIALIZED);
+                    return r.getCallback().asMono();
                 });
     }
 
     //processes a request. May create/handle errors
-    private Mono<Void> evaluate(Request r) {
-        return r.input.responseSingle(((response, byteBufMono) ->
-                        handleResponseCodes(response, byteBufMono.asString())))
-                .doOnNext(result -> r.response.emitValue(result, Sinks.EmitFailureHandler.FAIL_FAST))
-                .then()
-                .onErrorResume(error -> {
-                    if(error instanceof RateLimitedException) {
-                        System.out.println("Hit rate limit... delaying: " + ((RateLimitedException) error).getSecs() + " seconds");
-                        return Mono.delay(Duration.ofSeconds(((RateLimitedException) error).getSecs()))
-                                .flatMap(finished -> evaluate(r)); //try again
-                    }
-                    else {
-                        r.response.emitError(error, Sinks.EmitFailureHandler.FAIL_FAST);
-                        return Mono.empty();
-                    }
+    private Mono<String> evaluate(Request r) {
+        return r.getRequest()
+                .doOnNext(result -> r.getCallback().emitValue(result, FailureStrategies.RETRY_ON_SERIALIZED))
+                .onErrorResume(RateLimitedException.class, ratelimit -> {
+                    log.warn("Hit rate limit... delaying: " + ratelimit.getSecs() + " seconds");
+                    return Mono.delay(Duration.ofSeconds(ratelimit.getSecs()))
+                            .flatMap(finished -> evaluate(r)); //try again
+                })
+                .onErrorResume(RetryableException.class, retry -> {
+                    log.warn("Hit retryable request... delaying: 1 second");
+                    return Mono.delay(Duration.ofSeconds(1))
+                            .flatMap(finished -> evaluate(r)); //try again
+                })
+                .onErrorResume(other -> {
+                    log.error("Error passing through legacy queue " + other);
+                    r.getCallback().emitError(other, FailureStrategies.RETRY_ON_SERIALIZED);
+                    return Mono.empty();
                 });
-    }
-
-    //turns response codes into appropriate errors
-    private Mono<String> handleResponseCodes(HttpClientResponse response, Mono<String> contentMono) {
-        //no errors
-        if(response.status().code() / 100 == 2) return contentMono;
-        //yes errors
-        return contentMono
-                .switchIfEmpty(Mono.just("")) //make sure we don't eat errors w/out body
-                .flatMap(content -> Mono.error(FailureStrategies.makeWebException(response, content)));
-    }
-
-    public static class Request {
-        final HttpClient.ResponseReceiver<?> input;
-        final Sinks.One<String> response = Sinks.one();
-        public Request(HttpClient.ResponseReceiver<?> input) {
-            this.input = input;
-        }
     }
 }
