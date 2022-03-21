@@ -34,8 +34,12 @@ public class LegacyQueue {
                 });
     }
 
+    private Mono<String> evaluate(Request r, int attempt) {
+        return evaluate(r, 0);
+    }
+
     //processes a request. May create/handle errors
-    private Mono<String> evaluate(Request r) {
+    private Mono<String> evaluate(Request r, int attempt) {
         return r.getRequest()
                 .doOnNext(result -> r.getCallback().emitValue(result, FailureStrategies.RETRY_ON_SERIALIZED))
                 .onErrorResume(RateLimitedException.class, ratelimit -> {
@@ -44,9 +48,16 @@ public class LegacyQueue {
                             .flatMap(finished -> evaluate(r)); //try again
                 })
                 .onErrorResume(RetryableException.class, retry -> {
-                    log.warn("Hit retryable request... delaying: 1 second");
+                    log.warn("Hit retryable request... delaying: 1 second. This is attempt " + attempt);
+
+                    if(attempt > 9) {
+                        log.error("Hit retryable max amount of times: " + retry);
+                        r.getCallback().emitError(retry);
+                        return Mono.empty();
+                    }
+
                     return Mono.delay(Duration.ofSeconds(1))
-                            .flatMap(finished -> evaluate(r)); //try again
+                            .flatMap(finished -> evaluate(r, attempt + 1)); //try again
                 })
                 .onErrorResume(other -> {
                     log.error("Error passing through legacy queue " + other);
