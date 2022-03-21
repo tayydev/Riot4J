@@ -34,7 +34,7 @@ public class LegacyQueue {
                 });
     }
 
-    private Mono<String> evaluate(Request r, int attempt) {
+    private Mono<String> evaluate(Request r) {
         return evaluate(r, 0);
     }
 
@@ -52,7 +52,7 @@ public class LegacyQueue {
 
                     if(attempt > 9) {
                         log.error("Hit retryable max amount of times: " + retry);
-                        r.getCallback().emitError(retry);
+                        r.getCallback().emitError(retry, FailureStrategies.RETRY_ON_SERIALIZED);
                         return Mono.empty();
                     }
 
