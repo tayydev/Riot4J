@@ -27,15 +27,13 @@ public class Request {
 
     public Mono<String> getRequest() {
         return httpRequest.responseSingle(((response, byteBufMono) -> {
-            Mono<String> content = byteBufMono.asString(StandardCharsets.UTF_8);
-
             if(response.status().code() / 100 == 2) {
                 log.debug("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
-                return content;
+                return byteBufMono.asString(StandardCharsets.UTF_8);
             }
             else {
                 log.warn("Status is " + response.status().code()  + " Method rate limit count: " + response.responseHeaders().get("X-Method-Rate-Limit-Count") + " - App count: " + response.responseHeaders().get("X-App-Rate-Limit-Count"));
-                return content
+                return byteBufMono.asString(StandardCharsets.UTF_8)
                         .switchIfEmpty(Mono.just(""))
                         .flatMap(data -> Mono.error(FailureStrategies.makeWebException(response, data)));
             }
