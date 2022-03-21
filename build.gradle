@@ -3,7 +3,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "6.1.0" //ShadowJar
 }
 
-group 'io.github.nathannorth'
+group 'tech.nathann'
 version '3.0-SNAPSHOT'
 
 repositories {

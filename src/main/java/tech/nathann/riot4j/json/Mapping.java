@@ -17,8 +17,7 @@ public class Mapping {
             try {
                 return mapper.readValue(string, tClass);
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                throw new JsonException("Json didn't map correctly!");
+                throw new JsonException(e);
             }
         };
     }
