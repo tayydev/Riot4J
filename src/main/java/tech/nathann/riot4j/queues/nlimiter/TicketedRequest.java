@@ -18,11 +18,17 @@ public class TicketedRequest {
     private final ProactiveRatelimiter master;
     private final Dispenser bucket;
     private final Sinks.One<Instant> lock = Sinks.one();
+    private final int retries;
 
-    public TicketedRequest(Request request, ProactiveRatelimiter master, Dispenser bucket) {
+    public TicketedRequest(Request request, ProactiveRatelimiter master, Dispenser bucket, int retries) {
         this.request = request;
         this.master = master;
         this.bucket = bucket;
+        this.retries = retries;
+    }
+
+    public TicketedRequest(Request request, ProactiveRatelimiter master, Dispenser bucket) {
+        this(request, master, bucket, 0);
     }
 
     /**
@@ -31,6 +37,7 @@ public class TicketedRequest {
      */
     public Mono<String> getTry() {
         return request.getRequest()
+                .doOnCancel(() -> log.warn("Cancelled!"))
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
@@ -40,13 +47,12 @@ public class TicketedRequest {
                             .flatMap(fin -> getRetry()); //delay then retry
                 })
                 .onErrorResume(RetryableException.class, retry -> {
-                    if(retryCount > 7) { //give up
-                        log.error("Retried MAX amount " + retryCount + " of times. Dropping...");
+                    if(retries > 7) { //give up
+                        log.error("Retried MAX amount " + retries + " of times. Dropping...");
                         return Mono.error(retry);
                     }
                     Duration length = Duration.ofSeconds(retryTime()); //should be 1 2 4 8 16 32 64 etc
-                    retryCount++;
-                    log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retryCount +  " for this request");
+                    log.warn("Bucket got a retryable error! Delaying " + length + ". This is attempt " + retries +  " for this request");
                     return Mono.delay(length)
                             .flatMap(fin -> getRetry());
                 })
@@ -58,17 +64,20 @@ public class TicketedRequest {
                 });
     }
 
+    public Mono<String> getResponse() {
+        return request.getCallback().asMono();
+    }
+
     private Mono<String> getRetry() {
-        return master.pushRetry(this);
+        return master.pushRetry(new TicketedRequest(request, master, bucket, retries + 1));
     }
 
     public Mono<Instant> getLock() {
         return lock.asMono();
     }
 
-    private int retryCount = 0;
     private int retryTime() {
-        return (int) Math.pow(2, retryCount);
+        return (int) Math.pow(2, retries);
     }
 
     public Dispenser getBucket() {

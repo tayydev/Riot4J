@@ -3,7 +3,6 @@ package tech.nathann.riot4j.queues.nlimiter;
 import io.netty.channel.ConnectTimeoutException;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
-import io.netty.util.IllegalReferenceCountException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -42,7 +41,6 @@ public class Request {
                     error instanceof PrematureCloseException ||
                     error instanceof ConnectTimeoutException ||
                     error instanceof EncoderException ||
-                    error instanceof IllegalReferenceCountException ||
                     error instanceof ReadTimeoutException
             ) {
                 log.warn("Converting Netty error " + error + " to empty RetryableException");
@@ -54,13 +52,5 @@ public class Request {
 
     public Sinks.One<String> getCallback() {
         return callback;
-    }
-
-    public Mono<String> getResponse() {
-        return callback.asMono();
-    }
-
-    public HttpClient.ResponseReceiver<?> getRaw() {
-        return httpRequest;
     }
 }

@@ -34,7 +34,7 @@ public class ProactiveRatelimiter implements Ratelimiter {
         ingest.asFlux()
                 .flatMap(request -> request.getBucket().pushTicket(request))//buckets
                 .flatMap(request -> master.pushTicket(request)) //masterA
-                .concatMap(request -> secondary.pushTicket(request)) //masterB
+                .flatMap(request -> secondary.pushTicket(request)) //masterB
                 .concatMap(request -> delayRecur(request)) //stopper when we hit real ratelimit
                 .flatMap(request -> request.getTry()) //evaluate values
                 .subscribe();
@@ -57,7 +57,7 @@ public class ProactiveRatelimiter implements Ratelimiter {
                     Request request = new Request(input);
                     TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
                     ingest.emitNext(ticketed, FailureStrategies.RETRY_ON_SERIALIZED);
-                    return request.getResponse();
+                    return ticketed.getResponse();
                 }
         );
     }
@@ -65,7 +65,7 @@ public class ProactiveRatelimiter implements Ratelimiter {
     public Mono<String> pushRetry(TicketedRequest ticket) {
         return Mono.defer(() -> {
             ingest.emitNext(ticket, FailureStrategies.RETRY_ON_SERIALIZED);
-            return ticket.getRequest().getResponse();
+            return ticket.getResponse();
         });
     }
 
