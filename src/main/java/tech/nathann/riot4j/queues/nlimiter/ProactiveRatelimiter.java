@@ -51,21 +51,17 @@ public class ProactiveRatelimiter implements Ratelimiter {
     }
 
     public Mono<String> push(RateLimits limit, Region region, HttpClient.ResponseReceiver<?> input) {
-        return Mono.defer(() -> {
-                    Dispenser bucket = buckets.get(limit) //get map<region, bucket>
-                            .computeIfAbsent(region, key -> new Dispenser(limit, region)); //get actual bucket
-                    Request request = new Request(input);
-                    TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
-                    ingest.emitNext(ticketed, FailureStrategies.RETRY_ON_SERIALIZED);
-                    return ticketed.getResponse();
-                }
-        );
+        Dispenser bucket = buckets.get(limit) //get map<region, bucket>
+                .computeIfAbsent(region, key -> new Dispenser(limit, region)); //get actual bucket
+        Request request = new Request(input);
+        TicketedRequest ticketed = new TicketedRequest(request, this, bucket);
+        return pushTicket(ticketed);
     }
 
-    public Mono<String> pushRetry(TicketedRequest ticket) {
+    public Mono<String> pushTicket(TicketedRequest ticket) {
         return Mono.defer(() -> {
             ingest.emitNext(ticket, FailureStrategies.RETRY_ON_SERIALIZED);
-            return ticket.getResponse();
+            return ticket.getResponse().doOnCancel(() -> ticket.dispose());
         });
     }
 

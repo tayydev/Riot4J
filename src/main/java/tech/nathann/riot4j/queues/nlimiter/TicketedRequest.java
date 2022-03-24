@@ -1,5 +1,6 @@
 package tech.nathann.riot4j.queues.nlimiter;
 
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -10,6 +11,7 @@ import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TicketedRequest {
     private static final Logger log = LoggerFactory.getLogger(TicketedRequest.class);
@@ -19,6 +21,8 @@ public class TicketedRequest {
     private final Dispenser bucket;
     private final Sinks.One<Instant> lock = Sinks.one();
     private final int retries;
+
+    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
     public TicketedRequest(Request request, ProactiveRatelimiter master, Dispenser bucket, int retries) {
         this.request = request;
@@ -32,12 +36,16 @@ public class TicketedRequest {
     }
 
     /**
-     * We release the rate limit immediately before the web request, this has the benefit of being more agressive, but
+     * We release the rate limit immediately after the web request, this has the benefit of being more agressive, but
      * the drawback that future tries have to get their own ratelimit ticket
      */
     public Mono<String> getTry() {
         return request.getRequest()
-                .doOnCancel(() -> log.warn("Cancelled!"))
+                .doOnCancel(() -> {
+                    log.warn("Cancelled request in bucket " + bucket);
+                    lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED);
+                })
+                .doOnSubscribe(sub -> subscription.set(sub))
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
@@ -64,12 +72,17 @@ public class TicketedRequest {
                 });
     }
 
+    public void dispose() {
+        log.info("Disposing subscription!");
+        subscription.get().cancel();
+    }
+
     public Mono<String> getResponse() {
         return request.getCallback().asMono();
     }
 
     private Mono<String> getRetry() {
-        return master.pushRetry(new TicketedRequest(request, master, bucket, retries + 1));
+        return master.pushTicket(new TicketedRequest(request, master, bucket, retries + 1));
     }
 
     public Mono<Instant> getLock() {
