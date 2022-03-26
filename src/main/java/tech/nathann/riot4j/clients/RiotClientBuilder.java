@@ -35,7 +35,7 @@ public class RiotClientBuilder {
         ClientConfig config = builder.build();
 
         return new RiotDevelopmentAPIClient(config, RatePresets.DEV_CLIENT).test()
-                .onErrorResume(e -> Mono.error(new InvalidTokenException("The token specified is not valid")))
+                .onErrorResume(e -> Mono.error(new InvalidTokenException("The token specified is not valid"))) //todo this is a little generic of a catch
                 .ofType(RiotDevelopmentAPIClient.class);
     }
 
