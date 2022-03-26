@@ -1,7 +1,6 @@
 package tech.nathann.riot4j.queues.nlimiter;
 
 import io.netty.channel.ConnectTimeoutException;
-import io.netty.handler.codec.EncoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,6 @@ public class Request {
             if(
                     error instanceof PrematureCloseException ||
                     error instanceof ConnectTimeoutException ||
-                    error instanceof EncoderException ||
                     error instanceof ReadTimeoutException
             ) {
                 log.warn("Converting Netty error " + error + " to empty RetryableException");
