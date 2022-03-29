@@ -42,7 +42,7 @@ public class TicketedRequest {
     public Mono<String> getTry() {
         return request.getRequest()
                 .doOnCancel(() -> {
-                    log.warn("Cancelled request in bucket " + bucket);
+                    log.info("Cancelled request in bucket " + bucket);
                     lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED);
                 })
                 .doOnSubscribe(sub -> subscription.set(sub))
@@ -73,7 +73,7 @@ public class TicketedRequest {
     }
 
     public void dispose() {
-        log.info("Disposing subscription!");
+        log.debug("Disposing subscription!");
         subscription.get().cancel();
     }
 
