@@ -112,7 +112,7 @@ public class ValMatch implements Comparable<ValMatch> {
         //technically you can tie a deathmatch but the game just picks a winner anyway so im not gonna bother
         if(matchInfo().gameMode().equals(ValGameMode.DEATHMATCH)) return highestKills().puuid().equals(puuid) ? ValMatchResult.WON : ValMatchResult.LOST;
         if(winningTeam().isEmpty()) return ValMatchResult.TIED;
-        return getPlayer(puuid).teamId().equals(winningTeam().get()) ? ValMatchResult.WON : ValMatchResult.TIED;
+        return getPlayer(puuid).teamId().equals(winningTeam().get()) ? ValMatchResult.WON : ValMatchResult.LOST;
     }
 
     private PlayerData highestKills() {
