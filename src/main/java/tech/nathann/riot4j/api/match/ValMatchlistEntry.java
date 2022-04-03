@@ -4,8 +4,8 @@ import reactor.core.publisher.Mono;
 import tech.nathann.riot4j.clients.RiotProductionAPIClient;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.enums.regions.ValRegion;
-import tech.nathann.riot4j.enums.ValTeamId;
 import tech.nathann.riot4j.json.valMatch.MatchlistEntryData;
+import tech.nathann.riot4j.objects.ValTeamId;
 
 import java.util.Optional;
 

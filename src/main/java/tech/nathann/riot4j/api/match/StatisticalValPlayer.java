@@ -1,8 +1,8 @@
 package tech.nathann.riot4j.api.match;
 
-import tech.nathann.riot4j.enums.ValTeamId;
 import tech.nathann.riot4j.json.valMatch.PlayerData;
 import tech.nathann.riot4j.json.valMatch.PlayerStatsData;
+import tech.nathann.riot4j.objects.ValTeamId;
 
 import java.util.Optional;
 
