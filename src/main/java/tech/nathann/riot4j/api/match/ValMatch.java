@@ -3,11 +3,14 @@ package tech.nathann.riot4j.api.match;
 import tech.nathann.riot4j.enums.ValGameMode;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.enums.ValRoundResult;
-import tech.nathann.riot4j.enums.ValTeamId;
 import tech.nathann.riot4j.exceptions.MatchParseException;
 import tech.nathann.riot4j.json.valMatch.*;
+import tech.nathann.riot4j.objects.ValTeamId;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 public class ValMatch implements Comparable<ValMatch> {
 
@@ -105,9 +108,21 @@ public class ValMatch implements Comparable<ValMatch> {
         return Optional.empty();
     }
 
-    public boolean isWinFor(String puuid) {
-        if(winningTeam().isEmpty()) return false; // it isn't a win if you tie
-        return getPlayer(puuid).teamId().equals(winningTeam().get());
+    public ValMatchResult resultFor(String puuid) {
+        //technically you can tie a deathmatch but the game just picks a winner anyway so im not gonna bother
+        if(matchInfo().gameMode().equals(ValGameMode.DEATHMATCH)) return highestKills().puuid().equals(puuid) ? ValMatchResult.WON : ValMatchResult.LOST;
+        if(winningTeam().isEmpty()) return ValMatchResult.TIED;
+        return getPlayer(puuid).teamId().equals(winningTeam().get()) ? ValMatchResult.WON : ValMatchResult.TIED;
+    }
+
+    private PlayerData highestKills() {
+        PlayerData returnable = players().get(0);
+        for(PlayerData p: players()) {
+            if(p.stats().get().kills() > returnable.stats().get().kills()) {
+                returnable = p;
+            }
+        }
+        return returnable;
     }
 
     public PlayerData getPlayer(String puuid) {
@@ -150,32 +165,19 @@ public class ValMatch implements Comparable<ValMatch> {
         throw new MatchParseException("Player not found!");
     }
 
-    //returns a ValQueueId that represents what GAME MODE is being played eg. if it's a custom deathmatch then it returns deathmatch *instead* of custom
-    public ValQueueId gameModeAsQueue() { //todo gamemode should be an object also double check this can't be handled api side
-        String mode = matchInfo().gameMode().toString();
-        if(mode.equals("/Game/GameModes/Bomb/BombGameMode.BombGameMode_C")) return ValQueueId.UNRATED;
-        if(mode.equals("/Game/GameModes/Deathmatch/DeathmatchGameMode.DeathmatchGameMode_C")) return ValQueueId.DEATHMATCH;
-        if(mode.equals("/Game/GameModes/GunGame/GunGameTeamsGameMode.GunGameTeamsGameMode_C")) return ValQueueId.ESCALATION;
-        if(mode.equals("/Game/GameModes/OneForAll/OneForAll_GameMode.OneForAll_GameMode_C")) return ValQueueId.REPLICATION;
-        if(mode.equals("/Game/GameModes/QuickBomb/QuickBombGameMode.QuickBombGameMode_C")) return ValQueueId.SPIKE_RUSH;
-        if(mode.equals("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C")) return ValQueueId.SNOWBALL_FIGHT;
-        throw new MatchParseException("No matching game mode found!");
+    public String getGameTypeHuman() {
+        return ValMatch.getGameTypeHuman(matchInfo().queueId(), matchInfo().gameMode());
     }
 
-    public String getGameTypeHuman() {
+    public static String getGameTypeHuman(ValQueueId queue, ValGameMode mode) {
         StringJoiner joiner = new StringJoiner(" ");
 
-        if(matchInfo().queueId().equals(ValQueueId.CUSTOM))
-            joiner.add("Custom");
+        if(queue == ValQueueId.CUSTOM) joiner.add("Custom");
 
-        if(matchInfo().queueId().equals(ValQueueId.UNRATED)) joiner.add("Unrated");
-        if(matchInfo().queueId().equals(ValQueueId.COMPETITIVE)) joiner.add("Competitive");
+        if(queue == ValQueueId.UNRATED) joiner.add("Unrated");
+        if(queue == ValQueueId.COMPETITIVE) joiner.add("Competitive");
 
-        ValGameMode mode = matchInfo().gameMode();
-        if(!mode.equals(ValGameMode.BOMB)) {
-            String modeString = mode.name().toUpperCase(Locale.ROOT).substring(0, 1) + mode.name().toLowerCase(Locale.ROOT).substring(1);
-            joiner.add(modeString);
-        }
+        if(mode != ValGameMode.BOMB) joiner.add(mode.prettyName());
 
         return joiner.toString();
     }
