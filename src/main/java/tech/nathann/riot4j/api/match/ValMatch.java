@@ -73,7 +73,7 @@ public class ValMatch implements Comparable<ValMatch> {
 
     public PlayerData getMatchMVP() {
         PlayerData mvp = null;
-        int score = 0;
+        int score = -1; //must be less than 0 so that a game w/ only 0 scores overtakes it
         for(PlayerData player: players()) {
             if(player.stats().isEmpty()) continue;
             if(player.stats().get().score() > score) {
