@@ -85,7 +85,7 @@ public class ValMatch implements Comparable<ValMatch> {
         return mvp;
     }
 
-    public PlayerData getTeamMVP(ValTeamId teamId) {
+    public PlayerData getTeamMVP(ValTeamId teamId) { //todo everyone is a teammvp in deathmatch
         PlayerData mvp = null;
         int score = -1; //must be less than 0 so that a game w/ only 0 scores overtakes it
         for(PlayerData player: players()) {
