@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
- * A RiotAPIClient is a generic class that holds a token
+ * Defines one-to-one object mappings of all endpoints
  */
 public abstract class RiotAPIClient extends RawAPIInterface {
     protected final String token;

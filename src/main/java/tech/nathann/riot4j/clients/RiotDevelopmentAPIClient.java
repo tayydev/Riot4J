@@ -25,9 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A DevelopmentClient is the core of this library. The client contains logic for rate limiting and mapping requests.
- * If there were to be a time when I got access to a production key, a sister client, the RiotProductionClient with
- * more complete access to the API would be written.
+ * The main method of interfacing with the Riot API. Provides rate-limiting, exposes API objects. Only exposes methods
+ * that can be used with a Development API Key
  */
 public class RiotDevelopmentAPIClient extends RiotAPIClient {
 
@@ -38,57 +37,83 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     /**
-     * ACCOUNTS:
-     */
-
-    /**
-     * Gets a riot account from a name/tagline. note the parameter is a RIOT REGION, not a VAL REGION. There is no enum
-     * class for Riot Regions at this time. See also: {@link #getRiotAccountByName(String, String)} for an alternative that
-     * defaults to americas endpoint
-     * @param riotRegion a string representation of the desired RIOT region (eg 'americas' instead of 'na')
-     * @param name username to search for
-     * @param tagLine tag to search for
-     * @return returns a {@link WebException} with error code 404 if user not found
+     * Find a {@link RiotAccount} by name + tagline
+     * @param riotRegion specify account's *{@link RiotRegion}* (not a {@link ValRegion})
+     * @param name username
+     * @param tagLine tagline (eg. for 'nate#asdf' the tagline is 'asdf')
+     * @return a valid {@link RiotAccount}
      */
     public Mono<RiotAccount> getRiotAccountByName(RiotRegion riotRegion, String name, String tagLine) {
         return getRiotAccountData(riotRegion, name, tagLine)
                 .map(data -> new RiotAccount(this, data));
     }
 
+    /**
+     * Find a {@link RiotAccount} by name + tagline. Assumes {@link RiotRegion} from this client's {@link ClientConfig}
+     * @param name username
+     * @param tagLine tagline (eg. for 'nate#asdf' the tagline is 'asdf')
+     * @return a valid {@link RiotAccount}
+     */
     public Mono<RiotAccount> getRiotAccountByName(String name, String tagLine) {
         return getRiotAccountByName(riotRegion, name, tagLine);
     }
 
 
+    /**
+     * Find a {@link RiotAccount} by puuid
+     * @param riotRegion specify account's *{@link RiotRegion}* (not a {@link ValRegion})
+     * @param puuid player id
+     * @return a valid {@link RiotAccount}
+     */
     public Mono<RiotAccount> getRiotAccountByPuuid(RiotRegion riotRegion, String puuid) {
         return getRiotAccountData(riotRegion, puuid)
                 .map(data -> new RiotAccount(this, data));
     }
 
+    /**
+     * Find a {@link RiotAccount} by puuid. Assumes {@link RiotRegion} from this client's {@link ClientConfig}
+     * @param puuid player id
+     * @return a valid {@link RiotAccount}
+     */
     public Mono<RiotAccount> getRiotAccountByPuuid(String puuid) {
         return getRiotAccountByPuuid(riotRegion, puuid);
     }
 
     /**
-     * REGIONS:
+     * Used to get region for an account
+     * @param region provide *any* {@link RiotRegion}
+     * @param game provide any game user has played
+     * @param puuid player id
+     * @return region data for user
      */
-
     public Mono<ActiveShardData> getActiveShardsByGame(RiotRegion region, RiotGame game, String puuid) {
         return getActiveShardData(region, game, puuid);
     }
 
+    /**
+     * Used to get region for an account. Assumes that the account has played VALORANT
+     * @param region provide *any* {@link RiotRegion}
+     * @param puuid player id
+     * @return region data for user
+     */
+    public Mono<ActiveShardData> getActiveShardsVal(RiotRegion region, String puuid) {
+        return getActiveShardsByGame(region, RiotGame.VALORANT, puuid);
+    }
+
+    /**
+     * Used to get region for an account. Assumes that account has played VALORANT. Assumes {@link RiotRegion} from this
+     * client's {@link ClientConfig}
+     * @param puuid player id
+     * @return region data for user
+     */
     public Mono<ActiveShardData> getActiveShardsVal(String puuid) {
         return getActiveShardsByGame(riotRegion, RiotGame.VALORANT, puuid);
     }
 
     /**
-     * STATUS:
-     */
-
-    /**
-     * Gets VALORANT's status for a given region.
-     * @param region Which VALORANT region to get data from
-     * @return a PlatformStatusData containing any incidents / maintenance.
+     * Get VALORANT status
+     * @param region region to get status from
+     * @return status information
      */
     public Mono<PlatformStatusData> getValStatus(ValRegion region) {
         return getPlatformStatusData(region);
@@ -116,10 +141,10 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     /**
-     * Gets a ton of data from the game. Notably used to get ActIDs and game updates.
-     * @param region Which VALORANT region to get data from
-     * @param locale What language to return data in - technically optional on an API level but its just a headache to deal with every language at once
-     * @return a content object containing all characters, maps, chromas, skin(Levels)s, equips, gameModes, spray(Levels)s, charm(Levels)s, playerCards, playerTitles, and acts.
+     * Get information about VALORANT content
+     * @param region specify region for content (think when a region gets a patch before another)
+     * @param locale language to get content in. Not all regions are translated into every locale
+     * @return ValContent
      */
     public Mono<ValContent> getValContent(ValRegion region, ValLocale locale) {
         return getContentData(region, locale)
@@ -127,7 +152,7 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
     }
 
     private final Map<Tuple2<ValRegion, ValLocale>, Mono<ValContent>> cache = new HashMap<>();
-    public Mono<ValContent> getValContentCached(ValRegion region, ValLocale locale) {
+    public Mono<ValContent> getValContentCached(ValRegion region, ValLocale locale) { //todo cut?
         Tuple2<ValRegion, ValLocale> key = Tuples.of(region, locale);
         return cache.computeIfAbsent(key, newKey ->
                 getValContent(region, locale)
@@ -136,10 +161,26 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         );
     }
 
+    /**
+     * Get a flux that emits players indefinitely
+     * @param region
+     * @param act
+     * @param start what position in the leaderboard to start grabbing data from
+     * @return a flux that will honor *infinite* demand. {@link Flux#take(long)} is a must-have. See
+     * {@link RiotDevelopmentAPIClient#getValLeaderboards(ValRegion, ValActId, long, long)} for a capped method
+     */
     public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start) {
         return getValLeaderboards(region, act, start, Long.MAX_VALUE);
     }
 
+    /**
+     * Get a flux that emits player data from a start index until the end
+     * @param region
+     * @param act
+     * @param start start position
+     * @param cap final index (exclusive)
+     * @return a flux that will emit leaderboard information until reaching the cap index
+     */
     public Flux<LeaderboardPlayerData> getValLeaderboards(ValRegion region, ValActId act, long start, long cap) {
         if(start < 0) return Flux.error(new IndexOutOfBoundsException("Start cannot be negative!"));
         //there is technically the possibility of the leaderboards shrinking while you process chunks causing you to hit an invalid index.
@@ -160,8 +201,12 @@ public class RiotDevelopmentAPIClient extends RiotAPIClient {
         );
     }
 
+    /**
+     * Tests the API key of this client. Used in construction
+     * @return
+     */
     @Override
-    public Mono<RiotAPIClient> test() {
+    public Mono<RiotAPIClient> test() { //todo make protected?
         return this.getValStatus(valRegion).thenReturn(this);
     }
 }

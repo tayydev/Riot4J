@@ -9,6 +9,9 @@ import tech.nathann.riot4j.objects.ValTeamId;
 
 import java.util.Optional;
 
+/**
+ * Holds data for an individual match in a {@link ValMatchlist}
+ */
 public class ValMatchlistEntry {
     private final RiotProductionAPIClient parent;
     private final MatchlistEntryData data;

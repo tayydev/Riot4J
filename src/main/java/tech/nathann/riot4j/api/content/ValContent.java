@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Holds information from /val/content endpoint. Useful for transforming api values into human-readable names.
+ */
 public class ValContent {
 
     private final ContentData data;
@@ -39,7 +42,7 @@ public class ValContent {
     }
 
     private final Map<String, String> maps = new HashMap<>();
-    public String mapName(String mapPath) {
+    public String getMapName(String mapPath) {
         return maps.get(mapPath);
     }
 

@@ -6,6 +6,9 @@ import tech.nathann.riot4j.objects.ValTeamId;
 
 import java.util.Optional;
 
+/**
+ * Holds statistics for a VALORANT player in a competitive game.
+ */
 public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalValPlayer> {
     private final PlayerData data;
 

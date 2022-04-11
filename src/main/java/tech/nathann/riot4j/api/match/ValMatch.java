@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+/**
+ * Holds information in the /val/match/v1/matches/ api. Provides a lot of convenience tools to help parse data.
+ */
 public class ValMatch implements Comparable<ValMatch> {
 
     private final MatchData data;
