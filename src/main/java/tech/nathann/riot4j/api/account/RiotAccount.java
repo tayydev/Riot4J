@@ -10,6 +10,9 @@ import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
 import tech.nathann.riot4j.json.riotAccount.RiotAccountData;
 
+/**
+ * Holds data about a Riot Account and provides access to {@link ValRegion} and {@link ValMatchlist}
+ */
 public class RiotAccount implements Puuid {
     private static final Logger log = LoggerFactory.getLogger(RiotAccount.class);
 

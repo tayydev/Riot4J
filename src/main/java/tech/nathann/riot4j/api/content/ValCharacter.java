@@ -2,6 +2,9 @@ package tech.nathann.riot4j.api.content;
 
 import java.util.Locale;
 
+/**
+ * Holds name and id of a VALORANT character.
+ */
 public class ValCharacter {
     private final String id;
     private final String name;

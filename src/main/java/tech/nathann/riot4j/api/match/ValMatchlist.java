@@ -8,6 +8,9 @@ import tech.nathann.riot4j.json.valMatch.MatchlistData;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Holds data from the /val/match/v1/matchlists endpoint
+ */
 public class ValMatchlist {
     private final RiotProductionAPIClient parent;
     private final MatchlistData data;

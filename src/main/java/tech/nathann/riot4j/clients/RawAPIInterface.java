@@ -3,7 +3,7 @@ package tech.nathann.riot4j.clients;
 import reactor.netty.http.client.HttpClient;
 
 /**
- * The RawAPIInterface contains partial methods for web requests. It does not contain rate limiting, mapping logic, or convenience methods.
+ * Contains url information for http requests
  */
 public abstract class RawAPIInterface {
 
