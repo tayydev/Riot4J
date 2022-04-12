@@ -7,6 +7,8 @@ import tech.nathann.riot4j.enums.ValGameMode;
 import tech.nathann.riot4j.enums.ValQueueId;
 import tech.nathann.riot4j.objects.ValActId;
 
+import java.util.Optional;
+
 @Value.Immutable
 @JsonSerialize(as = ImmutableMatchInfoData.class)
 @JsonDeserialize(as = ImmutableMatchInfoData.class)
@@ -22,4 +24,5 @@ public interface MatchInfoData {
     ValGameMode gameMode();
     boolean isRanked();
     ValActId seasonId();
+    Optional<String> gameVersion();
 }
