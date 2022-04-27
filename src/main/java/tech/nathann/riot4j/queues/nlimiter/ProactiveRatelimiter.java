@@ -61,7 +61,8 @@ public class ProactiveRatelimiter implements Ratelimiter {
     public Mono<String> pushTicket(TicketedRequest ticket) {
         return Mono.defer(() -> {
             ingest.emitNext(ticket, FailureStrategies.RETRY_ON_SERIALIZED);
-            return ticket.getResponse().doOnCancel(() -> ticket.dispose());
+            return ticket.getResponse()
+                    .doOnCancel(() -> ticket.dispose());
         });
     }
 
