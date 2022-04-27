@@ -113,4 +113,15 @@ public class TicketedRequest {
     public Request getRequest() {
         return request;
     }
+
+    @Override
+    public String toString() {
+        return "TicketedRequest{" +
+                "request=" + request +
+                ", bucket=" + bucket +
+                ", retries=" + retries +
+                ", subscription=" + subscription +
+                ", isDispose=" + isDispose +
+                '}';
+    }
 }

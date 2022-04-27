@@ -13,22 +13,6 @@ import java.time.Instant;
 import java.util.Arrays;
 
 public class Dispenser {
-    public static void main(String[] args) {
-        Sinks.One<Boolean> sink = Sinks.one();
-
-        sink.asMono()
-                .doOnNext(e -> System.out.println(e))
-                .subscribe();
-
-        sink.emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST);
-        sink.emitValue(false, FailureStrategies.RETRY_ON_SERIALIZED);
-
-        Mono.delay(Duration.ofSeconds(2)).flatMap(del -> sink.asMono()).doOnNext(e -> System.out.println(e)).subscribe();
-
-
-        Mono.never().block();
-    }
-
     private static final Logger log = LoggerFactory.getLogger(Dispenser.class);
 
     private final RateLimits limit;
@@ -58,7 +42,7 @@ public class Dispenser {
 
     private int position = 0;
     private Mono<TicketedRequest> getTicket(Wrap wrap) {
-        log.debug("Ticket requested from " + limit);
+        log.debug("Ticket requested from " + limit + ", " + region);
 
         int pos = position % tickets.length;
         Mono<Instant> lockMono = tickets[pos];
@@ -66,7 +50,7 @@ public class Dispenser {
 
         return lockMono
                 .flatMap(lock -> {
-                    log.trace("Lock acquired");
+                    log.debug("Lock acquired from " + limit + ", " + region);
 
                     Duration timePassed = Duration.between(lock, Instant.now());
                     boolean isFree = reset.compareTo(timePassed) < 0;

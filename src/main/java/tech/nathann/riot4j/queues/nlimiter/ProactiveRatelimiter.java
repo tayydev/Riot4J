@@ -31,11 +31,16 @@ public class ProactiveRatelimiter implements Ratelimiter {
             buckets.put(limit, new HashMap<>());
         }
 
+        /**
+         * The reasoning behind doing individual buckets before master buckets is that the majority of delayed tickets
+         * will spend time in their individual bucket, and during that time we don't want to be consuming master slots
+         */
         ingest.asFlux()
                 .flatMap(request -> request.getBucket().pushTicket(request))//buckets
                 .flatMap(request -> master.pushTicket(request)) //masterA
                 .flatMap(request -> secondary.pushTicket(request)) //masterB
                 .concatMap(request -> delayRecur(request)) //stopper when we hit real ratelimit
+                .doOnNext(e -> log.debug("Ticketed leaving ratelimiter: " + e))
                 .flatMap(request -> request.getTry()) //evaluate values
                 .subscribe();
     }
