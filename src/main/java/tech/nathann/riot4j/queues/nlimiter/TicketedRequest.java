@@ -11,6 +11,7 @@ import tech.nathann.riot4j.queues.FailureStrategies;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class TicketedRequest {
@@ -21,8 +22,6 @@ public class TicketedRequest {
     private final Dispenser bucket;
     private final Sinks.One<Instant> lock = Sinks.one();
     private final int retries;
-
-    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
     public TicketedRequest(Request request, ProactiveRatelimiter master, Dispenser bucket, int retries) {
         this.request = request;
@@ -40,11 +39,17 @@ public class TicketedRequest {
      * the drawback that future tries have to get their own ratelimit ticket
      */
     public Mono<String> getTry() {
+        if(isDispose) {
+            log.info("Pre-disposing value.");
+            request.getCallback().emitError(new TimeoutException(), FailureStrategies.RETRY_ON_SERIALIZED);
+            return Mono.empty();
+        }
+
         return request.getRequest()
                 .doOnCancel(() -> {
                     log.info("Cancelled request in bucket " + bucket);
                 })
-                .doOnSubscribe(sub -> subscription.set(sub))
+                .doOnSubscribe(sub -> subscription = sub)
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
@@ -71,12 +76,17 @@ public class TicketedRequest {
                 });
     }
 
+    private Subscription subscription = null;
+    private boolean isDispose = false;
+
     public void dispose() {
         log.debug("Disposing subscription!");
         lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED);
-        Subscription s = subscription.get();
-        if(s != null){
-            s.cancel();
+        isDispose = true;
+        if(subscription == null) {
+            log.warn("No subscription found!");
+        } else {
+            subscription.cancel();
         }
     }
 

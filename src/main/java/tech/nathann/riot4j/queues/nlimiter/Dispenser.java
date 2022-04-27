@@ -13,6 +13,22 @@ import java.time.Instant;
 import java.util.Arrays;
 
 public class Dispenser {
+    public static void main(String[] args) {
+        Sinks.One<Boolean> sink = Sinks.one();
+
+        sink.asMono()
+                .doOnNext(e -> System.out.println(e))
+                .subscribe();
+
+        sink.emitValue(true, Sinks.EmitFailureHandler.FAIL_FAST);
+        sink.emitValue(false, FailureStrategies.RETRY_ON_SERIALIZED);
+
+        Mono.delay(Duration.ofSeconds(2)).flatMap(del -> sink.asMono()).doOnNext(e -> System.out.println(e)).subscribe();
+
+
+        Mono.never().block();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(Dispenser.class);
 
     private final RateLimits limit;
