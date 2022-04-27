@@ -51,8 +51,8 @@ public class Dispenser {
         return lockMono
                 .doOnCancel(() -> {
                     log.info("Cancelled inside limiter " + this);
-                    wrap.response.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
-                    tickets[pos] = Mono.just(Instant.now());
+                    wrap.response.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST); //this classes wrap needs to emit empty to the ratelimiter
+                    tickets[pos] = Mono.just(Instant.now()); //and we need to free the ticket todo cancel logic needs to be more centralized
                 })
                 .doOnSubscribe(sub -> request.setSubscription(sub))
                 .flatMap(lock -> {
