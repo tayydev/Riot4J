@@ -72,10 +72,18 @@ public class TicketedRequest {
                 });
     }
 
+    public void setSubscription(Subscription sub) {
+        subscription.set(sub);
+    }
+
     public void dispose() {
         log.debug("Disposing subscription!");
         Subscription s = subscription.get();
-        if(s != null) s.cancel();
+        if(s == null){
+            log.error("Subscription unable to to cancel without target.");
+            return;
+        }
+        s.cancel();
     }
 
     public Mono<String> getResponse() {

@@ -47,24 +47,30 @@ public class Dispenser {
         int pos = position % tickets.length;
         Mono<Instant> lockMono = tickets[pos];
 
-        return lockMono.flatMap(lock -> {
-            log.trace("Lock aquired");
+        return lockMono
+                .doOnCancel(() -> {
+                    log.info("Cancelled inside limiter!");
+                    tickets[pos] = Mono.just(Instant.now());
+                })
+                .doOnSubscribe(sub -> request.setSubscription(sub))
+                .flatMap(lock -> {
+                    log.trace("Lock acquired");
 
-            Duration timePassed = Duration.between(lock, Instant.now());
-            boolean isFree = reset.compareTo(timePassed) < 0;
-            if(isFree) {
-                log.trace("Ticket at position " + pos + " is free!");
-                tickets[pos] = request.getLock();
-                position++;
-                return Mono.just(request);
-            } else {
-                Duration delay = reset.minus(timePassed);
-                if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only care if delay is over 1 second
-                    log.warn("Ticket at pos " + pos + " for  " + this + " isn't free, delaying " + delay);
-                return Mono.delay(delay)
-                        .flatMap(fin -> getTicket(request));
-            }
-        });
+                    Duration timePassed = Duration.between(lock, Instant.now());
+                    boolean isFree = reset.compareTo(timePassed) < 0;
+                    if(isFree) {
+                        log.trace("Ticket at position " + pos + " is free!");
+                        tickets[pos] = request.getLock();
+                        position++;
+                        return Mono.just(request);
+                    } else {
+                        Duration delay = reset.minus(timePassed);
+                        if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only care if delay is over 1 second
+                            log.warn("Ticket at pos " + pos + " for  " + this + " isn't free, delaying " + delay);
+                        return Mono.delay(delay)
+                                .flatMap(fin -> getTicket(request));
+                    }
+                });
     }
 
     public Mono<TicketedRequest> pushTicket(TicketedRequest request) {
