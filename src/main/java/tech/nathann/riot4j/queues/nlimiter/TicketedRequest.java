@@ -74,7 +74,8 @@ public class TicketedRequest {
 
     public void dispose() {
         log.debug("Disposing subscription!");
-        subscription.get().cancel();
+        Subscription s = subscription.get();
+        if(s != null) s.cancel();
     }
 
     public Mono<String> getResponse() {
