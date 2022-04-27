@@ -43,7 +43,6 @@ public class TicketedRequest {
         return request.getRequest()
                 .doOnCancel(() -> {
                     log.info("Cancelled request in bucket " + bucket);
-                    lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED);
                 })
                 .doOnSubscribe(sub -> subscription.set(sub))
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
@@ -72,18 +71,13 @@ public class TicketedRequest {
                 });
     }
 
-    public void setSubscription(Subscription sub) {
-        subscription.set(sub);
-    }
-
     public void dispose() {
         log.debug("Disposing subscription!");
+        lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED);
         Subscription s = subscription.get();
-        if(s == null){
-            log.error("Subscription unable to to cancel without target.");
-            return;
+        if(s != null){
+            s.cancel();
         }
-        s.cancel();
     }
 
     public Mono<String> getResponse() {
