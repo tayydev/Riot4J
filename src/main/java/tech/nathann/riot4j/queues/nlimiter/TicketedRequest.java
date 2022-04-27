@@ -35,8 +35,8 @@ public class TicketedRequest {
     }
 
     /**
-     * We release the rate limit immediately after the web request, this has the benefit of being more agressive, but
-     * the drawback that future tries have to get their own ratelimit ticket
+     * We release the rate limit immediately after the web request, this has the benefit of being more aggressive, but
+     * the drawback that future tries have to get their own rate-limit ticket
      */
     public Mono<String> getTry() {
         if(isDispose) {
@@ -49,7 +49,7 @@ public class TicketedRequest {
                 .doOnCancel(() -> {
                     log.info("Cancelled request in bucket " + bucket);
                 })
-                .doOnSubscribe(sub -> subscription = sub)
+                .doOnSubscribe(sub -> subscription = sub) //todo cringe
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
                 .onErrorResume(RateLimitedException.class, rate -> {
                     Duration length = Duration.ofSeconds(rate.getSecs());
