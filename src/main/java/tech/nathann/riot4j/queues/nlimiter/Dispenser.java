@@ -32,24 +32,26 @@ public class Dispenser {
         Arrays.fill(tickets, Mono.just(Instant.EPOCH));
 
         queue.asFlux()
-                .concatMap(request ->
-                        getTicket(request.request)
-                                .doOnNext(fin -> request.response.emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
+                .concatMap(wrap ->
+                        getTicket(wrap)
+                                .doOnNext(fin -> wrap.response.emitValue(fin, FailureStrategies.RETRY_ON_SERIALIZED))
                 ).subscribe();
 
         log.info("Created bucket: " + this);
     }
 
     private int position = 0;
-    private Mono<TicketedRequest> getTicket(TicketedRequest request) {
-        log.trace("Ticket requested from " + limit);
+    private Mono<TicketedRequest> getTicket(Wrap wrap) {
+        log.info("Ticket requested from " + limit);
 
         int pos = position % tickets.length;
         Mono<Instant> lockMono = tickets[pos];
+        TicketedRequest request = wrap.request;
 
         return lockMono
                 .doOnCancel(() -> {
-                    log.info("Cancelled inside limiter!");
+                    log.info("Cancelled inside limiter " + this);
+                    wrap.response.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
                     tickets[pos] = Mono.just(Instant.now());
                 })
                 .doOnSubscribe(sub -> request.setSubscription(sub))
@@ -68,7 +70,7 @@ public class Dispenser {
                         if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only care if delay is over 1 second
                             log.warn("Ticket at pos " + pos + " for  " + this + " isn't free, delaying " + delay);
                         return Mono.delay(delay)
-                                .flatMap(fin -> getTicket(request));
+                                .flatMap(fin -> getTicket(wrap));
                     }
                 });
     }
