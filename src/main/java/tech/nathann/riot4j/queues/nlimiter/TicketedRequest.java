@@ -60,7 +60,7 @@ public class TicketedRequest {
                 })
                 .onErrorResume(RetryableException.class, retry -> {
                     if(retries > 7) { //give up
-                        log.error("Retried MAX amount " + retries + " of times. Dropping...");
+                        log.error("Retried MAX amount " + retries + " of times in: " + bucket);
                         return Mono.error(retry);
                     }
                     Duration length = Duration.ofSeconds(retryTime()); //should be 1 2 4 8 16 32 64 etc
