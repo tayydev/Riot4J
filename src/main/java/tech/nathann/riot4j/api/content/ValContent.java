@@ -53,4 +53,19 @@ public class ValContent {
     public static String getRankURL(int rank) {
         return "https://github.com/NathanNorth/ValorantAssets/raw/main/icons/ranked/" + rank + ".png";
     }
+
+    private static final Map<Integer, String> base = Map.of(
+            1, "Iron",
+            2, "Bronze",
+            3, "Silver",
+            4, "Gold",
+            5, "Platinum",
+            6, "Diamond",
+            7, "Immortal",
+            8, "Radiant"
+    );
+    public static String getRankHuman(int competitiveTier) {
+        if(competitiveTier < 1) return "Unranked";
+        return base.get(competitiveTier / 3) + " " + (competitiveTier % 3 + 1);
+    }
 }
