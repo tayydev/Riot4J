@@ -10,7 +10,8 @@ public enum ValGameMode {
     ESCALATION("/Game/GameModes/GunGame/GunGameTeamsGameMode.GunGameTeamsGameMode_C"),
     REPLICATION("/Game/GameModes/OneForAll/OneForAll_GameMode.OneForAll_GameMode_C"),
     SPIKE_RUSH("/Game/GameModes/QuickBomb/QuickBombGameMode.QuickBombGameMode_C"),
-    SNOWBALL_FIGHT("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C"); //todo default val?
+    SNOWBALL_FIGHT("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C"),
+    NEW_MAP("/Game/GameModes/NewMap/NewMapGameMode.NewMapGameMode_C"); //todo default val?
 
     private final String value;
 

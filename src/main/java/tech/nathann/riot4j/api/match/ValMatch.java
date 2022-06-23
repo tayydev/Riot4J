@@ -176,11 +176,13 @@ public class ValMatch implements Comparable<ValMatch> {
     public static String getGameTypeHuman(ValQueueId queue, ValGameMode mode) {
         StringJoiner joiner = new StringJoiner(" ");
 
+        //these are qualifiers that apply to any match
         if(queue == ValQueueId.CUSTOM) joiner.add("Custom");
-
         if(queue == ValQueueId.UNRATED) joiner.add("Unrated");
         if(queue == ValQueueId.COMPETITIVE) joiner.add("Competitive");
+        if(queue == ValQueueId.NEW_MAP) joiner.add("New Map");
 
+        //if a match is a non-standard mode then specify that too
         if(mode != ValGameMode.BOMB) joiner.add(mode.prettyName());
 
         return joiner.toString();

@@ -24,7 +24,7 @@ dependencies {
     annotationProcessor 'org.immutables:value:2.9.0'
 
     //netty (includes reactor)
-    compile 'io.projectreactor.netty:reactor-netty-http:1.0.17'
+    implementation 'io.projectreactor.netty:reactor-netty-http:1.0.17'
 }
 
 test {
