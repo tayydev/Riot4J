@@ -12,7 +12,6 @@ import tech.nathann.riot4j.queues.FailureStrategies;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class TicketedRequest {
     private static final Logger log = LoggerFactory.getLogger(TicketedRequest.class);
@@ -99,7 +98,13 @@ public class TicketedRequest {
     }
 
     public Mono<Instant> getLock() {
-        return lock.asMono();
+        return Mono.firstWithValue(
+                lock.asMono(),
+                Mono.delay(Duration.ofMinutes(5)).map(fin -> {
+                    log.error("LOCK TIMED OUT");
+                    return Instant.now();
+                })
+        );
     }
 
     private int retryTime() {

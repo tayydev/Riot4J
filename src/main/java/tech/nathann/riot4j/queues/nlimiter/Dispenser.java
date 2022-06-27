@@ -61,7 +61,7 @@ public class Dispenser {
                         return Mono.just(request);
                     } else {
                         Duration delay = reset.minus(timePassed);
-                        if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only care if delay is over 1 second
+                        if(delay.compareTo(Duration.ofSeconds(1)) > 0) //we only log if delay is over 1 second
                             log.warn("Ticket at pos " + pos + " for  " + this + " isn't free, delaying " + delay);
                         return Mono.delay(delay)
                                 .flatMap(fin -> getTicket(wrap));
