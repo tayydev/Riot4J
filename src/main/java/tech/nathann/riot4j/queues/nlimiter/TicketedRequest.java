@@ -46,7 +46,7 @@ public class TicketedRequest {
 
         return request.getRequest()
                 .doOnCancel(() -> {
-                    log.info("Cancelled request in bucket " + bucket);
+                    log.debug("Cancelled request in bucket " + bucket);
                 })
                 .doOnSubscribe(sub -> subscription = sub) //todo cringe
                 .doOnEach(any -> lock.emitValue(Instant.now(), FailureStrategies.RETRY_ON_SERIALIZED)) //no matter what we release lock AFTER value emitted
