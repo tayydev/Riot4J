@@ -68,8 +68,8 @@ public abstract class RiotAPIClient extends RawAPIInterface {
             String backupTagline) {
         return ImmutableRiotAccountData.builder()
                 .puuid(input.puuid().get()) //we assume puuid is valid for now or else we're screwed
-                .gameName(input.puuid().orElse(backupName))
-                .tagLine(input.puuid().orElse(backupTagline))
+                .gameName(input.gameName().orElse(backupName))
+                .tagLine(input.tagLine().orElse(backupTagline))
                 .build();
     }
 
