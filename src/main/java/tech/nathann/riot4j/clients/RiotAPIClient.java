@@ -7,6 +7,8 @@ import tech.nathann.riot4j.enums.regions.RiotRegion;
 import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.Mapping;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
+import tech.nathann.riot4j.json.riotAccount.ImmutableRiotAccountData;
+import tech.nathann.riot4j.json.riotAccount.IncompleteRiotAccountData;
 import tech.nathann.riot4j.json.riotAccount.RiotAccountData;
 import tech.nathann.riot4j.json.valContent.ContentData;
 import tech.nathann.riot4j.json.valLeaderboard.LeaderboardData;
@@ -55,7 +57,20 @@ public abstract class RiotAPIClient extends RawAPIInterface {
         String taglineSanitized = URLEncoder.encode(tagline, StandardCharsets.UTF_8);
 
         return limiter.push(RateLimits.ACCOUNT_BY_RIOT_ID, region, getAccountByNameRaw(token, region.toString(), nameSanitized, taglineSanitized))
-                .map(Mapping.map(RiotAccountData.class));
+                .map(Mapping.map(IncompleteRiotAccountData.class)) //todo i really dont want to have this system long term
+                .map(incomplete -> handleIncompleteAccountData(incomplete, name, tagline));
+    }
+
+    //todo make this method symetical (eg implement it for the ../puuid/ endpoint???
+    private static RiotAccountData handleIncompleteAccountData(
+            IncompleteRiotAccountData input,
+            String backupName,
+            String backupTagline) {
+        return ImmutableRiotAccountData.builder()
+                .puuid(input.puuid().get()) //we assume puuid is valid for now or else we're screwed
+                .gameName(input.puuid().orElse(backupName))
+                .tagLine(input.puuid().orElse(backupTagline))
+                .build();
     }
 
     protected Mono<RiotAccountData> getRiotAccountData(RiotRegion region, String puuid) {
