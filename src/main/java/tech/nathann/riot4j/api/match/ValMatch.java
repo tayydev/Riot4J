@@ -142,7 +142,7 @@ public class ValMatch implements Comparable<ValMatch> {
     public StatisticalValPlayer getStatisticalPlayer(String puuid) {
         PlayerData player = getPlayer(puuid);
 
-        if(player.stats().isEmpty()) throw new MatchParseException("Could not create StatisticalValPlayer. PlayerData has no stats.");
+        if(player.stats().isEmpty()) throw new MatchParseException("Could not create StatisticalValPlayer. PlayerData has no stats for puuid: " + puuid);
 
         /**
          * Counts headshots. Note: we do not filter shotguns at this time because there isn't a definite way to
