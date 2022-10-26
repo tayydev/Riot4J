@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public class ValTeamId {
     public static final ValTeamId BLUE = new ValTeamId("Blue");
     public static final ValTeamId RED = new ValTeamId("Red");
+    public static final ValTeamId NEUTRAL = new ValTeamId("Neutral");
 
     private final String value;
 
