@@ -1,5 +1,7 @@
 package tech.nathann.riot4j.clients;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import tech.nathann.riot4j.enums.*;
@@ -28,6 +30,8 @@ import java.time.Duration;
  * Defines one-to-one object mappings of all endpoints
  */
 public abstract class RiotAPIClient extends RawAPIInterface {
+    private static final Logger log = LoggerFactory.getLogger(RiotAPIClient.class);
+
     protected final String token;
     protected final RiotRegion riotRegion;
     protected final ValRegion valRegion;
@@ -66,6 +70,10 @@ public abstract class RiotAPIClient extends RawAPIInterface {
             IncompleteRiotAccountData input,
             String backupName,
             String backupTagline) {
+        log.info("Handling potentially incomplete data for puuid " + input.puuid());
+        if(input.gameName().isEmpty() || input.tagLine().isEmpty()) {
+            log.warn("Found user with empty name/tag: " + input);
+        }
         return ImmutableRiotAccountData.builder()
                 .puuid(input.puuid().get()) //we assume puuid is valid for now or else we're screwed
                 .gameName(input.gameName().orElse(backupName))
