@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import tech.nathann.riot4j.enums.*;
+import tech.nathann.riot4j.enums.RiotGame;
+import tech.nathann.riot4j.enums.ValLocale;
+import tech.nathann.riot4j.enums.ValRecentQueue;
 import tech.nathann.riot4j.enums.regions.RiotRegion;
 import tech.nathann.riot4j.enums.regions.ValRegion;
 import tech.nathann.riot4j.json.Mapping;
 import tech.nathann.riot4j.json.riotAccount.ActiveShardData;
-import tech.nathann.riot4j.json.riotAccount.ImmutableRiotAccountData;
-import tech.nathann.riot4j.json.riotAccount.IncompleteRiotAccountData;
 import tech.nathann.riot4j.json.riotAccount.RiotAccountData;
 import tech.nathann.riot4j.json.valContent.ContentData;
 import tech.nathann.riot4j.json.valLeaderboard.LeaderboardData;
@@ -61,24 +61,7 @@ public abstract class RiotAPIClient extends RawAPIInterface {
         String taglineSanitized = URLEncoder.encode(tagline, StandardCharsets.UTF_8);
 
         return limiter.push(RateLimits.ACCOUNT_BY_RIOT_ID, region, getAccountByNameRaw(token, region.toString(), nameSanitized, taglineSanitized))
-                .map(Mapping.map(IncompleteRiotAccountData.class)) //todo i really dont want to have this system long term
-                .map(incomplete -> handleIncompleteAccountData(incomplete, name, tagline));
-    }
-
-    //todo make this method symetical (eg implement it for the ../puuid/ endpoint???
-    private static RiotAccountData handleIncompleteAccountData(
-            IncompleteRiotAccountData input,
-            String backupName,
-            String backupTagline) {
-        log.info("Handling potentially incomplete data for puuid " + input.puuid());
-        if(input.gameName().isEmpty() || input.tagLine().isEmpty()) {
-            log.warn("Found user with empty name/tag: " + input);
-        }
-        return ImmutableRiotAccountData.builder()
-                .puuid(input.puuid().get()) //we assume puuid is valid for now or else we're screwed
-                .gameName(input.gameName().orElse(backupName))
-                .tagLine(input.tagLine().orElse(backupTagline))
-                .build();
+                .map(Mapping.map(RiotAccountData.class));
     }
 
     protected Mono<RiotAccountData> getRiotAccountData(RiotRegion region, String puuid) {
