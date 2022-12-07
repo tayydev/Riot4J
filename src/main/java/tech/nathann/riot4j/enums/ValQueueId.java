@@ -13,6 +13,7 @@ public enum ValQueueId {
     REPLICATION("onefa"),
     SNOWBALL_FIGHT("snowball"),
     NEW_MAP("newmap"),
+    SWIFTPLAY("swiftplay"),
     CUSTOM(""); //todo default val?
 
     private final String value;
