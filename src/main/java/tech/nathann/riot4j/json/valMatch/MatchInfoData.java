@@ -25,4 +25,6 @@ public interface MatchInfoData {
     boolean isRanked();
     ValActId seasonId();
     Optional<String> gameVersion();
+    Optional<String> region();
+    Optional<String> gameLoopZone();
 }

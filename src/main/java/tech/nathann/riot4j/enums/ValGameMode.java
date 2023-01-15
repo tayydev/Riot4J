@@ -11,7 +11,8 @@ public enum ValGameMode {
     REPLICATION("/Game/GameModes/OneForAll/OneForAll_GameMode.OneForAll_GameMode_C"),
     SPIKE_RUSH("/Game/GameModes/QuickBomb/QuickBombGameMode.QuickBombGameMode_C"),
     SNOWBALL_FIGHT("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C"),
-    NEW_MAP("/Game/GameModes/NewMap/NewMapGameMode.NewMapGameMode_C"); //todo default val?
+    NEW_MAP("/Game/GameModes/NewMap/NewMapGameMode.NewMapGameMode_C"),
+    SWIFT_PLAY("/Game/GameModes/_Development/Swiftplay_EndOfRoundCredits/Swiftplay_EoRCredits_GameMode.Swiftplay_EoRCredits_GameMode_C"); //todo default val?
 
     private final String value;
 
