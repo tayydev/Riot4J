@@ -27,5 +27,4 @@ public interface MatchInfoData {
     Optional<String> gameVersion();
     Optional<String> region();
     Optional<String> gameLoopZone();
-    Optional<String> gameLoopZone();
 }
