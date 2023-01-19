@@ -21,4 +21,6 @@ public interface PlayerData {
     int competitiveTier();
     String playerCard();
     String playerTitle();
+
+    Optional<Boolean> isObserver();
 }
