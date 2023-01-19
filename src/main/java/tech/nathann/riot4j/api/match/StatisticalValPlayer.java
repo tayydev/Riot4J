@@ -98,4 +98,9 @@ public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalV
     public String playerTitle() {
         return data.playerTitle();
     }
+
+    @Override
+    public Optional<Boolean> isObserver() {
+        return data.isObserver();
+    }
 }
