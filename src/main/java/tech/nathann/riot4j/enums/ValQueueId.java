@@ -14,6 +14,7 @@ public enum ValQueueId {
     SNOWBALL_FIGHT("snowball"),
     NEW_MAP("newmap"),
     SWIFTPLAY("swiftplay"),
+    PREMIER("premier"),
     CUSTOM(""); //todo default val?
 
     private final String value;
