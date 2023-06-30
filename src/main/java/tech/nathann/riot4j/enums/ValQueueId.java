@@ -15,7 +15,9 @@ public enum ValQueueId {
     NEW_MAP("newmap"),
     SWIFTPLAY("swiftplay"),
     PREMIER("premier"),
-    CUSTOM(""); //todo default val?
+    TEAM_DEATHMATCH("hurm"),
+    CUSTOM("")
+    ; //todo default val?
 
     private final String value;
 

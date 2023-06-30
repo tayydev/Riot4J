@@ -12,7 +12,9 @@ public enum ValGameMode {
     SPIKE_RUSH("/Game/GameModes/QuickBomb/QuickBombGameMode.QuickBombGameMode_C"),
     SNOWBALL_FIGHT("/Game/GameModes/SnowballFight/SnowballFightGameMode.SnowballFightGameMode_C"),
     NEW_MAP("/Game/GameModes/NewMap/NewMapGameMode.NewMapGameMode_C"),
-    SWIFT_PLAY("/Game/GameModes/_Development/Swiftplay_EndOfRoundCredits/Swiftplay_EoRCredits_GameMode.Swiftplay_EoRCredits_GameMode_C"); //todo default val?
+    SWIFT_PLAY("/Game/GameModes/_Development/Swiftplay_EndOfRoundCredits/Swiftplay_EoRCredits_GameMode.Swiftplay_EoRCredits_GameMode_C"),
+    TEAM_DEATHMATCH("/Game/GameModes/HURM/HURMGameMode.HURMGameMode_C")
+    ; //todo default val?
 
     private final String value;
 
