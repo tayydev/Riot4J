@@ -23,4 +23,6 @@ public interface PlayerData {
     String playerTitle();
 
     Optional<Boolean> isObserver();
+
+    int accountLevel();
 }

@@ -103,4 +103,9 @@ public class StatisticalValPlayer implements PlayerData, Comparable<StatisticalV
     public Optional<Boolean> isObserver() {
         return data.isObserver();
     }
+
+    @Override
+    public int accountLevel() {
+        return data.accountLevel();
+    }
 }
