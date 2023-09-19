@@ -28,5 +28,6 @@ public interface ContentData {
     List<ContentItemData> playerCards();
     List<ContentItemData> playerTitles();
     List<ContentItemData> ceremonies(); //undocumented
+    List<ContentItemData> totems(); //undocumented
     List<ActData> acts();
 }
