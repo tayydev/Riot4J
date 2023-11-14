@@ -1,5 +1,6 @@
 package tech.nathann.riot4j.json.valMatch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Value.Immutable
 @JsonSerialize(as = ImmutableMatchInfoData.class)
 @JsonDeserialize(as = ImmutableMatchInfoData.class)
+@JsonIgnoreProperties(ignoreUnknown = true) //TODO read premier info
 public interface MatchInfoData {
     String matchId();
     String mapId();
