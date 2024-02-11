@@ -11,6 +11,10 @@ repositories {
 }
 
 dependencies {
+    // Required for m1 macs to be able to run riot4j
+    implementation "io.netty:netty-resolver-dns-native-macos::osx-aarch_64"
+
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
