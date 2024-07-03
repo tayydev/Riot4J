@@ -28,4 +28,5 @@ public interface RoundResultData {
     LocationData defuseLocation();
     List<PlayerRoundStatsData> playerStats();
     ValRoundResult roundResultCode();
+    Optional<String> winningTeamRole();
 }
